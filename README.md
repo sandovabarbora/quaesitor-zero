@@ -159,11 +159,12 @@ it reproduces with no warehouse of your own and no model access.
 ## Install
 
 ```bash
-uvx --from git+https://github.com/sandovabarbora/quaesitor-zero quaesitor-zero   # from source, works today
-uv tool install quaesitor-zero      # or: pipx install quaesitor-zero  (once on PyPI)
+pip install quaesitor-zero        # also: uv tool install quaesitor-zero  ·  pipx install quaesitor-zero
+uvx quaesitor-zero --help         # or run it without installing
+uvx --from git+https://github.com/sandovabarbora/quaesitor-zero quaesitor-zero   # latest from source
 ```
 
-Python 3.10+, one dependency (DuckDB), Apache-2.0.
+On [PyPI](https://pypi.org/project/quaesitor-zero/): Python 3.10+, one dependency (DuckDB), Apache-2.0.
 
 ## If a question is wrong
 
