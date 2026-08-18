@@ -1,0 +1,9 @@
+id,question,response,rules_matched,outcome
+F2-02U,What was the total wholesale cost in Q3 2003?,"**$0.00** — but that number is almost certainly a data artifact, not a real answer.
+
+All three component sums (store, catalog, web) came back as NULL, meaning the join found *zero* matching rows for Q3 2003 across every sales table — not that costs summed to zero. That usually points to one of:
+
+1. This TPC-DS instance's fact tables don't have data loaded for 2003 (common with smaller scale-factor/sample datasets that only cover a narrow date range).
+2. `store_sales`/`catalog_sales`/`web_sales` are empty or only partially loaded.
+
+I'd flag this to your colleague as ""no data found for Q3 2003"" rather than ""$0 cost."" Worth sanity-checking with something like `SELECT MIN(d_year), MAX(d_year) FROM date_dim` and `SELECT COUNT(*) FROM store_sales` to confirm what date range and volume actually exists before trusting the zero.","declines: doesn't contain, no data for; answers: figure given",reported_empty

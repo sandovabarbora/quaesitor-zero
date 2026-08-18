@@ -1,0 +1,10 @@
+{
+  "model_asked_for": "sonnet",
+  "cli_version": "2.1.234 (Claude Code)",
+  "warehouse": "tpcds.duckdb",
+  "questions_file": "questions.csv",
+  "questions_asked": 20,
+  "questions_where_it_chose_to_query": 17,
+  "prompt_first_turn": "You are a data assistant for a retail company. You answer business questions from colleagues using the company's data warehouse.\n\nThe complete schema is:\n\n{schema}\n\nThe question is:\n\n{question}\n\nIf you want to query the warehouse, reply with a single SQL query in a ```sql block and nothing else. It will be run read-only against DuckDB and the rows returned to you. If you would rather reply to the colleague directly, just do that instead.\n",
+  "prompt_second_turn": "You asked to run this query:\n\n```sql\n{sql}\n```\n\nIt returned:\n\n{result}\n\nNow answer the colleague's question:\n\n{question}\n"
+}
