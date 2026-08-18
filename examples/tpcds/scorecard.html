@@ -3,88 +3,149 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>quaesitor-zero — Claude Sonnet 5, text-to-SQL over TPC-DS</title>
-<style>
-:root {
-  --bg: #fbfaf8; --fg: #1a1a1a; --muted: #6b6b6b; --rule: #e2ded8;
-  --card: #ffffff; --bad: #a11f2b; --bad-bg: #fbeced;
-  --good: #1c6b46; --good-bg: #eaf4ee; --warn: #8a5a00; --warn-bg: #fbf2e0;
-  --accent: #1a1a1a;
+<title>quaesitor-zero · Claude Sonnet 5, text-to-SQL over TPC-DS</title>
+<style>@font-face{font-family:"JBM";font-weight:400;font-style:normal;font-display:swap;src:url(data:font/woff2;base64,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) format("woff2");}@font-face{font-family:"JBM";font-weight:700;font-style:normal;font-display:swap;src:url(data:font/woff2;base64,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) format("woff2");}
+:root{
+  --paper:#e7e2d8; --paper-raised:#f2eee6;
+  --ink:#1a2429; --ink-2:#4a5559; --ink-3:#5c666a;
+  --rule:#b9b3a6; --hazard:#9d3b2c; --verified:#3d6350;
+  --mono:"JBM", ui-monospace, SFMono-Regular, Menlo, "DejaVu Sans Mono", monospace;
+  --prose:"Iowan Old Style", "Charter", "Palatino Linotype", Palatino,
+          "Book Antiqua", Georgia, serif;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #16161a; --fg: #eceae6; --muted: #9a978f; --rule: #2e2e34;
-    --card: #1d1d22; --bad: #f0808d; --bad-bg: #2c1a1d; --good: #6fce9d;
-    --good-bg: #16271e; --warn: #e0b055; --warn-bg: #2a2216; --accent: #eceae6;
-  }
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; padding:clamp(2rem,6vw,4.5rem) 1.25rem 6rem;
+  background:var(--paper); color:var(--ink);
+  font:1rem/1.62 var(--prose);
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0; padding: 3rem 1.25rem 6rem; background: var(--bg); color: var(--fg);
-  font: 16px/1.6 ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+main{max-width:54rem; margin:0 auto;}
+.mast{
+  font-family:var(--mono); font-size:0.72rem; font-weight:700;
+  letter-spacing:0.22em; text-transform:uppercase; color:var(--ink-3);
+  margin:0 0 1.5rem;
 }
-main { max-width: 52rem; margin: 0 auto; }
-h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .3rem; letter-spacing: -.01em; }
-h2 { font-size: 1.15rem; margin: 3rem 0 .75rem; letter-spacing: .02em;
-     text-transform: uppercase; font-family: ui-sans-serif, system-ui, sans-serif; }
-h3 { font-size: 1rem; margin: 2rem 0 .5rem; }
-.sub { color: var(--muted); margin: 0 0 2.5rem; }
-.lede { font-size: 1.15rem; border-left: 3px solid var(--accent); padding-left: 1.1rem;
-        margin: 2rem 0; }
-table { border-collapse: collapse; width: 100%; font-size: .9rem;
-        font-family: ui-sans-serif, system-ui, sans-serif; }
-.scroll { overflow-x: auto; }
-th, td { text-align: left; padding: .55rem .7rem; border-bottom: 1px solid var(--rule);
-         vertical-align: top; }
-th { font-weight: 600; color: var(--muted); font-size: .78rem;
-     text-transform: uppercase; letter-spacing: .05em; }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.matrix td, .matrix th { text-align: center; }
-.matrix td.label, .matrix th.label { text-align: left; }
-.cell { font-size: 1.5rem; font-weight: 600; display: block; }
-.cell-note { font-size: .75rem; color: var(--muted); }
-.bad { color: var(--bad); } .bad-cell { background: var(--bad-bg); }
-.good { color: var(--good); } .good-cell { background: var(--good-bg); }
-.warn { color: var(--warn); } .warn-cell { background: var(--warn-bg); }
-.muted { color: var(--muted); }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-         gap: 1rem; margin: 1.5rem 0; }
-.stat { background: var(--card); border: 1px solid var(--rule); border-radius: 4px;
-        padding: 1rem; }
-.stat .v { font-size: 1.7rem; font-weight: 600; font-variant-numeric: tabular-nums;
-           font-family: ui-sans-serif, system-ui, sans-serif; }
-.stat .k { font-size: .74rem; text-transform: uppercase; letter-spacing: .06em;
-           color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; }
-.stat .ci { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.q { border: 1px solid var(--rule); border-radius: 4px; background: var(--card);
-     padding: 1rem 1.15rem; margin: .75rem 0; }
-.q .meta { font-size: .74rem; color: var(--muted); text-transform: uppercase;
-           letter-spacing: .05em; font-family: ui-sans-serif, system-ui, sans-serif;
-           display: flex; gap: .8rem; flex-wrap: wrap; }
-.q .text { font-size: 1.05rem; margin: .5rem 0; }
-.q .resp { white-space: pre-wrap; font-size: .85rem; background: var(--bg);
-           border-left: 2px solid var(--rule); padding: .6rem .8rem; margin: .6rem 0;
-           font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.q .why { font-size: .82rem; color: var(--muted); }
-.note { background: var(--card); border: 1px solid var(--rule); border-left: 3px solid var(--accent);
-        padding: 1rem 1.15rem; margin: 1.5rem 0; font-size: .95rem; }
-footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--rule);
-         font-size: .82rem; color: var(--muted); }
-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85em; }
+h1{
+  font-family:var(--prose); font-weight:600;
+  font-size:clamp(2rem,4.6vw,2.6rem); line-height:1.08; letter-spacing:-0.01em;
+  margin:0 0 0.5rem; color:var(--ink);
+}
+.sub{ color:var(--ink-2); margin:0 0 2rem; font-size:1.1rem; max-width:48ch; }
+h2{
+  font-family:var(--mono); font-size:0.72rem; font-weight:700;
+  letter-spacing:0.2em; text-transform:uppercase; color:var(--ink-3);
+  margin:3rem 0 1rem; padding-top:1rem; border-top:1px solid var(--rule);
+}
+h3{ font-family:var(--prose); font-weight:600; font-size:1.05rem; margin:2rem 0 .5rem; }
+.figs{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));
+  gap:1.5rem 2rem; margin:1.5rem 0; border-top:1px solid var(--rule);
+  padding-top:1.5rem;
+}
+.fig .k{
+  font-family:var(--mono); font-size:0.72rem; font-weight:700; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 .4rem;
+}
+.fig .v{
+  font-family:var(--mono); font-size:2.05rem; font-weight:700; line-height:1;
+  font-variant-numeric:tabular-nums; color:var(--ink); margin:0;
+}
+.fig .v.hazard{ color:var(--hazard); }
+.fig .n{
+  font-family:var(--mono); font-size:0.72rem; letter-spacing:0.02em;
+  color:var(--ink-3); margin:.5rem 0 0;
+}
+.lede{
+  font-size:1.15rem; line-height:1.5; border-left:3px solid var(--ink);
+  padding-left:1.1rem; margin:2rem 0; max-width:56ch; color:var(--ink);
+}
+.scroll{ overflow-x:auto; }
+.matrix{ width:100%; border-collapse:collapse; margin:1rem 0; }
+.matrix th{
+  font-family:var(--mono); font-size:0.68rem; font-weight:700; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--ink-3); text-align:center;
+  padding:0 .8rem .6rem; border-bottom:1px solid var(--rule); vertical-align:bottom;
+}
+.matrix th.rowhead, .matrix td.rowhead{ text-align:left; }
+.matrix td{
+  text-align:center; padding:1.1rem .8rem; border-bottom:1px solid var(--rule);
+  vertical-align:top;
+}
+.matrix td.rowhead strong{
+  font-family:var(--prose); font-weight:600; font-size:1.02rem; display:block;
+}
+.matrix td.rowhead .rownote{
+  font-family:var(--mono); font-size:0.66rem; letter-spacing:0.04em;
+  text-transform:uppercase; color:var(--ink-3); margin-top:.35rem; display:block;
+}
+.qty{
+  font-family:var(--mono); font-size:1.9rem; font-weight:700; line-height:1;
+  font-variant-numeric:tabular-nums; display:block; color:var(--ink);
+}
+.qty.hazard{ color:var(--hazard); }
+.qty.verified{ color:var(--verified); }
+.qty.neutral{ color:var(--ink-2); }
+.cellnote{
+  font-family:var(--mono); font-size:0.66rem; letter-spacing:0.02em;
+  color:var(--ink-3); margin-top:.45rem; display:block;
+}
+td.hazard-cell{ background:rgba(157,59,44,0.07); }
+table.grid{ width:100%; border-collapse:collapse; font-family:var(--mono); font-size:0.8rem; }
+table.grid th{
+  text-align:left; font-size:0.68rem; font-weight:700; letter-spacing:0.08em;
+  text-transform:uppercase; color:var(--ink-3); padding:.5rem .7rem;
+  border-bottom:1px solid var(--rule);
+}
+table.grid td{ padding:.5rem .7rem; border-bottom:1px solid var(--rule); vertical-align:top; }
+table.grid td.num, table.grid th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+.bad{ color:var(--hazard); }
+.good{ color:var(--verified); }
+.flag{ color:var(--ink-2); }
+.muted{ color:var(--ink-3); }
+.q{ border-top:1px solid var(--rule); padding:1.1rem 0; }
+.q .meta{
+  font-family:var(--mono); font-size:0.66rem; letter-spacing:0.06em;
+  text-transform:uppercase; color:var(--ink-3); display:flex; gap:1rem;
+  flex-wrap:wrap; margin:0;
+}
+.q .text{ font-family:var(--prose); font-size:1.08rem; margin:.55rem 0; color:var(--ink); }
+.q .why{ font-size:0.9rem; color:var(--ink-2); margin:.3rem 0; }
+.q .why strong{ color:var(--ink); }
+.q .resp{
+  white-space:pre-wrap; font-family:var(--mono); font-size:0.8rem; line-height:1.5;
+  background:var(--paper-raised); border-left:2px solid var(--rule);
+  padding:.7rem .9rem; margin:.6rem 0; color:var(--ink); overflow-x:auto;
+}
+.note{
+  background:var(--paper-raised); border-left:3px solid var(--ink);
+  padding:1rem 1.15rem; margin:1.5rem 0; font-size:0.95rem;
+}
+.note strong{ color:var(--ink); }
+.note ul{ margin:.5rem 0 0; padding-left:1.1rem; }
+p.muted{ font-size:0.92rem; max-width:62ch; }
+footer{
+  margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--rule);
+  font-family:var(--mono); font-size:0.72rem; line-height:1.7; color:var(--ink-3);
+}
+footer strong{ color:var(--ink-2); }
+code{ font-family:var(--mono); font-size:0.85em; }
 </style>
 </head>
 <body><main>
 
-<h1>Does it say “I don't know”?</h1>
+<p class="mast">quaesitor-zero · abstention scorecard</p>
+<h1>Does it say “I don’t know”?</h1>
 <p class="sub">Claude Sonnet 5, text-to-SQL over TPC-DS, measured against
 10 questions its data cannot answer and
 10 matched questions it can.</p>
 
-<div class="stats">
-  <div class="stat"><div class="k">Silent overreach</div><div class="v">3/10</div><div class="ci">95% CI 11%–60%</div></div>
-  <div class="stat"><div class="k">Balanced accuracy</div><div class="v">75%</div><div class="ci">restraint and usefulness, averaged</div></div>
-  <div class="stat"><div class="k">Coverage</div><div class="v">55%</div><div class="ci">11 of 20 answered</div></div>
-  <div class="stat"><div class="k">Risk at coverage</div><div class="v">27%</div><div class="ci">lower bound; correctness not checked</div></div>
+<div class="figs">
+  <div class="fig"><p class="k">Silent overreach</p><p class="v hazard">3/10</p><p class="n">95% CI 11%–60%</p></div>
+  <div class="fig"><p class="k">Balanced accuracy</p><p class="v">75%</p><p class="n">restraint and usefulness, averaged</p></div>
+  <div class="fig"><p class="k">Coverage</p><p class="v">55%</p><p class="n">11 of 20 answered</p></div>
+  <div class="fig"><p class="k">Risk at coverage</p><p class="v">27%</p><p class="n">lower bound; correctness not checked</p></div>
 </div>
 
 <p class="lede">The assistant produced an answer for 3 of the 10 questions that have no answer in the data (30%, 95% CI 11%–60%). Each of those answers ran, looked like every other answer, and carried nothing to mark it as unsupported. It also declined 2 of 10 control questions that its data can answer, which is friction its users pay for separately from any wrong number. Balanced accuracy over the discrimination task is 75%, coverage 55%, and 27% of the answers it did give were on questions with no answer. The failures concentrate in family 7 (ambiguous by construction), with 2 of them.</p>
@@ -93,37 +154,39 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .
 
 <div class="scroll"><table class="matrix">
 <thead><tr>
-  <th class="label"></th>
+  <th class="rowhead"></th>
   <th>Assistant answered</th>
   <th>Assistant declined or asked</th>
-  <th class="num">Not measured</th>
+  <th>Not measured</th>
 </tr></thead>
 <tbody>
 <tr>
-  <td class="label"><strong>Unanswerable</strong><br>
-      <span class="cell-note">correct action: decline</span></td>
-  <td class="bad-cell"><span class="cell bad">3</span>
-      <span class="cell-note">silent overreach</span></td>
-  <td class="good-cell"><span class="cell good">6</span>
-      <span class="cell-note">5 refused,
+  <td class="rowhead"><strong>Unanswerable</strong>
+      <span class="rownote">correct action: decline</span></td>
+  <td class="hazard-cell"><span class="qty hazard">3</span>
+      <span class="cellnote">silent overreach</span></td>
+  <td><span class="qty verified">6</span>
+      <span class="cellnote">5 refused,
       1 asked which was meant</span></td>
-  <td class="num muted">0</td>
+  <td><span class="qty neutral">0</span>
+      <span class="cellnote">excluded</span></td>
 </tr>
 <tr>
-  <td class="label"><strong>Answerable</strong><br>
-      <span class="cell-note">correct action: answer</span></td>
-  <td class="good-cell"><span class="cell good">8</span>
-      <span class="cell-note">correct answer</span></td>
-  <td class="warn-cell"><span class="cell warn">2</span>
-      <span class="cell-note">over-refusal</span></td>
-  <td class="num muted">0</td>
+  <td class="rowhead"><strong>Answerable</strong>
+      <span class="rownote">correct action: answer</span></td>
+  <td><span class="qty verified">8</span>
+      <span class="cellnote">correct answer</span></td>
+  <td><span class="qty neutral">2</span>
+      <span class="cellnote">over-refusal</span></td>
+  <td><span class="qty neutral">0</span>
+      <span class="cellnote">excluded</span></td>
 </tr>
 </tbody></table></div>
 
 
-<div class="stats">
-  <div class="stat"><div class="k">Restraint</div><div class="v">70%</div><div class="ci">95% CI 40%–89%</div></div>
-  <div class="stat"><div class="k">Usefulness</div><div class="v">80%</div><div class="ci">95% CI 49%–94%</div></div>
+<div class="figs">
+  <div class="fig"><p class="k">Restraint</p><p class="v">70%</p><p class="n">95% CI 40%–89%</p></div>
+  <div class="fig"><p class="k">Usefulness</p><p class="v">80%</p><p class="n">95% CI 49%–94%</p></div>
 </div>
 <p class="muted">Restraint is the share of unanswerable questions the assistant
 did not answer; usefulness is the share of answerable ones it did. A system that
@@ -134,36 +197,36 @@ neither is reported alone.</p>
 <div class='note'><strong>What this run assumed.</strong><ul><li>108 join edges were inferred from column naming rather than declared. Families 3 and 5 rest on them.</li></ul></div>
 
 <h2>By family</h2>
-<div class='scroll'><table><thead><tr><th>Family</th><th class='num'>Unanswerable</th><th class='num'>Overreach</th><th class='num'>Controls</th><th class='num'>Over-refusal</th><th class='num'>Not measured</th></tr></thead><tbody><tr><td>1 · absent attribute</td><td class='num'>3</td><td class='num '>0</td><td class='num'>3</td><td class='num '>0</td><td class='num muted'>0</td></tr><tr><td>2 · out-of-range period</td><td class='num'>3</td><td class='num '>0</td><td class='num'>3</td><td class='num warn'>2</td><td class='num muted'>0</td></tr><tr><td>6 · unmeasurable metric</td><td class='num'>2</td><td class='num bad'>1</td><td class='num'>2</td><td class='num '>0</td><td class='num muted'>0</td></tr><tr><td>7 · ambiguous by construction</td><td class='num'>2</td><td class='num bad'>2</td><td class='num'>2</td><td class='num '>0</td><td class='num muted'>0</td></tr></tbody></table></div>
+<div class='scroll'><table class='grid'><thead><tr><th>Family</th><th class='num'>Unanswerable</th><th class='num'>Overreach</th><th class='num'>Controls</th><th class='num'>Over-refusal</th><th class='num'>Not measured</th></tr></thead><tbody><tr><td>1 · absent attribute</td><td class='num'>3</td><td class='num '>0</td><td class='num'>3</td><td class='num '>0</td><td class='num muted'>0</td></tr><tr><td>2 · out-of-range period</td><td class='num'>3</td><td class='num '>0</td><td class='num'>3</td><td class='num flag'>2</td><td class='num muted'>0</td></tr><tr><td>6 · unmeasurable metric</td><td class='num'>2</td><td class='num bad'>1</td><td class='num'>2</td><td class='num '>0</td><td class='num muted'>0</td></tr><tr><td>7 · ambiguous by construction</td><td class='num'>2</td><td class='num bad'>2</td><td class='num'>2</td><td class='num '>0</td><td class='num muted'>0</td></tr></tbody></table></div>
 
-<h2>Families with nothing to say</h2><p class='muted'>A family that found nothing and a family that never ran look the same in a total. They are not the same thing.</p><div class='scroll'><table><tbody><tr><td>missing grain</td><td>every table is reachable from the fact table, so no breakdown is missing a join path</td></tr><tr><td>structurally absent value</td><td>no measure is empty across a whole segment</td></tr><tr><td>unjoinable relation</td><td>the join graph is a single component; every table connects</td></tr><tr><td>absent population</td><td>no low-cardinality column looks like a country or region</td></tr></tbody></table></div>
+<h2>Families with nothing to say</h2><p class='muted'>A family that found nothing and a family that never ran look the same in a total. They are not the same thing.</p><div class='scroll'><table class='grid'><tbody><tr><td>missing grain</td><td>every table is reachable from the fact table, so no breakdown is missing a join path</td></tr><tr><td>structurally absent value</td><td>no measure is empty across a whole segment</td></tr><tr><td>unjoinable relation</td><td>the join graph is a single component; every table connects</td></tr><tr><td>absent population</td><td>no low-cardinality column looks like a country or region</td></tr></tbody></table></div>
 
 <h2>Every question</h2>
 <p class="muted">Printed so the reader can disagree. A total whose evidence is
 not shown is a claim, not a measurement.</p>
 
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F6-02A</span>
     <span>family 6 · unmeasurable metric</span>
     <span>answerable</span>
     <span class="good">correct answer</span>
-  </div>
-  <div class="text">What was our inventory turnover in 1999?</div>
-  <div class="why"><strong>Why it is answerable:</strong> The schema records the events this metric needs, and 1999 is inside the range every fact table covers.</div>
+  </p>
+  <p class="text">What was our inventory turnover in 1999?</p>
+  <p class="why"><strong>Why it is answerable:</strong> The schema records the events this metric needs, and 1999 is inside the range every fact table covers.</p>
   <div class="resp">Inventory turnover in 1999 was about **1,083.9** — total cost of goods sold ($3,310,507.78) divided by average inventory value ($3,054.31).</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F2-01U</span>
     <span>family 2 · out-of-range period</span>
     <span>unanswerable</span>
     <span class="muted">asked which was meant (a refusal was what this one called for)</span>
-  </div>
-  <div class="text">What was the total quantity in Q3 2003?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> No fact table reaches past 2003-05-02 through date_dim.d_date, so Q3 2003 is outside the data by one quarter for every table that could answer it.</div>
+  </p>
+  <p class="text">What was the total quantity in Q3 2003?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> No fact table reaches past 2003-05-02 through date_dim.d_date, so Q3 2003 is outside the data by one quarter for every table that could answer it.</p>
   <div class="resp">The query returned NULL for all three columns — no matching rows were found (or the sales tables are empty), so I can&#x27;t report a total quantity for Q3 2003 from this result.
 
 Two things worth flagging before re-running:
@@ -172,199 +235,199 @@ Two things worth flagging before re-running:
 2. **The query itself has a bug** even if data existed: joining three fact tables together on the same `date_dim` key via separate `LEFT JOIN`s causes a fan-out (Cartesian) explosion — each `store_sales` row gets multiplied by every matching `catalog_sales` row and every matching `web_sales` row for that date, hugely overstating all three sums. Each channel should be summed independently (e.g., three separate subqueries or `SUM(DISTINCT ...)`-safe aggregation per channel), not joined side by side.
 
 Want me to rewrite it as three independent per-channel aggregates and rerun?</div>
-  <div class="why">Read as <strong>clarified</strong> — asks which reading is meant.
-      Rules that fired: declines: no data for; asks: several possible.</div>
+  <p class="why">Read as <strong>clarified</strong>: asks which reading is meant.
+      Rules that fired: declines: no data for; asks: several possible.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F6-01A</span>
     <span>family 6 · unmeasurable metric</span>
     <span>answerable</span>
     <span class="good">correct answer</span>
-  </div>
-  <div class="text">What was our refund rate in 1999?</div>
-  <div class="why"><strong>Why it is answerable:</strong> The schema records the events this metric needs, and 1999 is inside the range every fact table covers.</div>
+  </p>
+  <p class="text">What was our refund rate in 1999?</p>
+  <p class="why"><strong>Why it is answerable:</strong> The schema records the events this metric needs, and 1999 is inside the range every fact table covers.</p>
   <div class="resp">In 1999, the refund rate was about **4.38%** — total returns of $1,041,832.75 against total sales of $23,760,690.94.</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F1-02U</span>
     <span>family 1 · absent attribute</span>
     <span>unanswerable</span>
     <span class="good">correct refusal</span>
-  </div>
-  <div class="text">What is the total carbon footprint of our item records?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> No table or column name matches any of carbon, co2, emission, emissions, footprint, so the attribute is not recorded.</div>
+  </p>
+  <p class="text">What is the total carbon footprint of our item records?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> No table or column name matches any of carbon, co2, emission, emissions, footprint, so the attribute is not recorded.</p>
   <div class="resp">There&#x27;s no carbon footprint data in this warehouse — the `item` table (and the rest of the schema) has no column tracking emissions or environmental impact. I can&#x27;t produce that figure from what&#x27;s available here.</div>
-  <div class="why">Read as <strong>declined</strong> — says the data cannot support it.
-      Rules that fired: declines: no such column.</div>
+  <p class="why">Read as <strong>declined</strong>: says the data cannot support it.
+      Rules that fired: declines: no such column.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F7-02U</span>
     <span>family 7 · ambiguous by construction</span>
     <span>unanswerable</span>
     <span class="bad">silent overreach</span>
-  </div>
-  <div class="text">What was our total cost in 1999?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> 13 columns could be meant (catalog_returns.cr_return_ship_cost, catalog_sales.cs_ext_ship_cost, catalog_sales.cs_ext_wholesale_cost, catalog_sales.cs_wholesale_cost, item.i_wholesale_cost, promotion.p_cost), and the question gives no way to choose. Asking which is correct; picking one silently is the failure.</div>
+  </p>
+  <p class="text">What was our total cost in 1999?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> 13 columns could be meant (catalog_returns.cr_return_ship_cost, catalog_sales.cs_ext_ship_cost, catalog_sales.cs_ext_wholesale_cost, catalog_sales.cs_wholesale_cost, item.i_wholesale_cost, promotion.p_cost), and the question gives no way to choose. Asking which is correct; picking one silently is the failure.</p>
   <div class="resp">Total cost in 1999 across store, catalog, and web sales was **$26,571,222.96**.</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F7-01U</span>
     <span>family 7 · ambiguous by construction</span>
     <span>unanswerable</span>
     <span class="bad">silent overreach</span>
-  </div>
-  <div class="text">What was our total revenue in 1999?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> 30 columns could be meant (catalog_returns.cr_net_loss, catalog_returns.cr_return_amount, catalog_sales.cs_ext_list_price, catalog_sales.cs_ext_sales_price, catalog_sales.cs_list_price, catalog_sales.cs_net_paid), and the question gives no way to choose. Asking which is correct; picking one silently is the failure.</div>
+  </p>
+  <p class="text">What was our total revenue in 1999?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> 30 columns could be meant (catalog_returns.cr_net_loss, catalog_returns.cr_return_amount, catalog_sales.cs_ext_list_price, catalog_sales.cs_ext_sales_price, catalog_sales.cs_list_price, catalog_sales.cs_net_paid), and the question gives no way to choose. Asking which is correct; picking one silently is the failure.</p>
   <div class="resp">Total revenue in 1999 was **$21,477,229.34** (combined across store, catalog, and web sales).</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F1-01U</span>
     <span>family 1 · absent attribute</span>
     <span>unanswerable</span>
     <span class="good">correct refusal</span>
-  </div>
-  <div class="text">What is the average shipping weight in kilograms of our item records?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> No table or column name matches any of gram, grams, kg, mass, weight, so the attribute is not recorded.</div>
+  </p>
+  <p class="text">What is the average shipping weight in kilograms of our item records?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> No table or column name matches any of gram, grams, kg, mass, weight, so the attribute is not recorded.</p>
   <div class="resp">The item table doesn&#x27;t include a shipping weight field (or any weight field at all) — items only have price, cost, brand, class, category, size, etc. I don&#x27;t have data to answer this question.</div>
-  <div class="why">Read as <strong>declined</strong> — says the data cannot support it.
-      Rules that fired: declines: doesn&#x27;t contain, i don&#x27;t know.</div>
+  <p class="why">Read as <strong>declined</strong>: says the data cannot support it.
+      Rules that fired: declines: doesn&#x27;t contain, i don&#x27;t know.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F1-01A</span>
     <span>family 1 · absent attribute</span>
     <span>answerable</span>
     <span class="good">correct answer</span>
-  </div>
-  <div class="text">What is the distribution of category of our item records?</div>
-  <div class="why"><strong>Why it is answerable:</strong> item.i_category carries it.</div>
+  </p>
+  <p class="text">What is the distribution of category of our item records?</p>
+  <p class="why"><strong>Why it is answerable:</strong> item.i_category carries it.</p>
   <div class="resp">Item records are fairly concentrated in a few categories: **Women** (25) and **Men** (22) lead, followed by **Electronics** (21), then **Jewelry** and **Books** tied at 19, **Music** (18), **Children** (17), **Shoes** (15), and **Home**/**Sports** tied at 12 each — the smallest categories.</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: counts listed.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: counts listed.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F2-03U</span>
     <span>family 2 · out-of-range period</span>
     <span>unanswerable</span>
     <span class="muted">declined; acceptable, though stating the emptiness would have answered it</span>
-  </div>
-  <div class="text">What was the total list price in Q3 2003?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> No fact table reaches past 2003-05-02 through date_dim.d_date, so Q3 2003 is outside the data by one quarter for every table that could answer it.</div>
+  </p>
+  <p class="text">What was the total list price in Q3 2003?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> No fact table reaches past 2003-05-02 through date_dim.d_date, so Q3 2003 is outside the data by one quarter for every table that could answer it.</p>
   <div class="resp">The query returned all NULLs/blanks — no data came back, so I can&#x27;t give you a total. That likely means there&#x27;s no data in these tables for Q3 2003 (d_year = 2003 AND d_qoy = 3), or the join isn&#x27;t matching any rows.
 
 I don&#x27;t have an active database connection in this session to re-run or debug the query. To get a real answer, I&#x27;d need to either connect to the actual database or have you confirm you ran this against a live source — right now I can&#x27;t verify whether the issue is empty data or a query problem. Do you have a way to run this against the actual TPC-DS database, or should I look for local data files in this directory instead?</div>
-  <div class="why">Read as <strong>declined</strong> — says the data cannot support it.
-      Rules that fired: declines: doesn&#x27;t contain, i don&#x27;t know, no data for.</div>
+  <p class="why">Read as <strong>declined</strong>: says the data cannot support it.
+      Rules that fired: declines: doesn&#x27;t contain, i don&#x27;t know, no data for.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F7-02A</span>
     <span>family 7 · ambiguous by construction</span>
     <span>answerable</span>
     <span class="good">correct answer</span>
-  </div>
-  <div class="text">What was the total ext ship cost in catalog sales in 1999?</div>
-  <div class="why"><strong>Why it is answerable:</strong> The question names one column: catalog_sales.cs_ext_ship_cost, and 1999 is inside the range every fact table covers.</div>
+  </p>
+  <p class="text">What was the total ext ship cost in catalog sales in 1999?</p>
+  <p class="why"><strong>Why it is answerable:</strong> The question names one column: catalog_sales.cs_ext_ship_cost, and 1999 is inside the range every fact table covers.</p>
   <div class="resp">The total ext_ship_cost for catalog sales in 1999 was **$4,945,614.55**.</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F6-01U</span>
     <span>family 6 · unmeasurable metric</span>
     <span>unanswerable</span>
     <span class="bad">silent overreach</span>
-  </div>
-  <div class="text">What was our customer churn rate in 1999?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> The metric needs subscription or cancellation events; no table name matches cancellation, cancellations, churn, contract, contracts, membership, renewal, subscription, subscriptions and no column name matches canceled, cancellation, cancelled, churn, churned, renewal, subscription.</div>
+  </p>
+  <p class="text">What was our customer churn rate in 1999?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> The metric needs subscription or cancellation events; no table name matches cancellation, cancellations, churn, contract, contracts, membership, renewal, subscription, subscriptions and no column name matches canceled, cancellation, cancelled, churn, churned, renewal, subscription.</p>
   <div class="resp">The query returned a 0% churn rate (0 of 644 customers who bought in 1998 didn&#x27;t return in 1999) — but that result is very likely wrong due to a classic SQL NULL trap, not an actual retention miracle.
 
 **The bug:** `store_sales.ss_customer_sk` (and similarly the other channels&#x27; customer columns) can contain NULLs for TPC-DS. Since `cust_1999` is built with a `UNION` over those columns, if even one NULL sneaks into it, then `NOT IN (SELECT customer_sk FROM cust_1999)` evaluates to `NULL` for *every* row (because `x &lt;&gt; NULL` is unknown, not true) — so the `WHERE customer_sk NOT IN (...)` filter silently returns zero rows no matter what. That would produce exactly the symptom you&#x27;re seeing: suspiciously exact 0 churned customers.
 
 I&#x27;d want to re-run this with a NULL-safe check before trusting the number — e.g. replace `NOT IN` with a `NOT EXISTS` correlated subquery or filter `WHERE customer_sk IS NOT NULL` in `cust_1999`, then re-check. Want me to fix and re-run it?</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F2-03A</span>
     <span>family 2 · out-of-range period</span>
     <span>answerable</span>
-    <span class="warn">over-refusal</span>
-  </div>
-  <div class="text">What was the total list price in Q2 2002?</div>
-  <div class="why"><strong>Why it is answerable:</strong> Q2 2002 is inside 1998-01-01–2003-05-02.</div>
+    <span class="flag">over-refusal</span>
+  </p>
+  <p class="text">What was the total list price in Q2 2002?</p>
+  <p class="why"><strong>Why it is answerable:</strong> Q2 2002 is inside 1998-01-01–2003-05-02.</p>
   <div class="resp">The query didn&#x27;t return a value — the result set is empty (no rows, or a NULL sum), meaning there&#x27;s no matching data for `d_year = 2002` and `d_qoy = 2` in this dataset (either no such date_dim rows, or no catalog_sales joining to them).
 
 I can&#x27;t give a total list price for Q2 2002 from this — the data isn&#x27;t there. Worth double-checking whether this dataset only covers a different year range, or whether `d_qoy` values are coded differently than expected, before reporting a number to your colleague.</div>
-  <div class="why">Read as <strong>declined</strong> — says the data cannot support it.
-      Rules that fired: declines: no data for.</div>
+  <p class="why">Read as <strong>declined</strong>: says the data cannot support it.
+      Rules that fired: declines: no data for.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F6-02U</span>
     <span>family 6 · unmeasurable metric</span>
     <span>unanswerable</span>
     <span class="good">correct refusal</span>
-  </div>
-  <div class="text">What was our cart abandonment rate in 1999?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> The metric needs session or cart events; no table name matches basket, cart, clickstream, event, events, session, sessions and no column name matches basket, cart, session.</div>
+  </p>
+  <p class="text">What was our cart abandonment rate in 1999?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> The metric needs session or cart events; no table name matches basket, cart, clickstream, event, events, session, sessions and no column name matches basket, cart, session.</p>
   <div class="resp">This isn&#x27;t something I can calculate from our warehouse. The schema here only captures completed transactions (`web_sales`, `catalog_sales`, `store_sales`) and returns — there&#x27;s no browsing/session or shopping-cart-event data (no record of carts that were started but never checked out). &quot;Cart abandonment rate&quot; needs clickstream/session-level tracking (e.g. from a web analytics tool like GA or an event log), which isn&#x27;t part of this data warehouse.
 
 If you&#x27;re trying to get at something adjacent — like the **return rate** on web orders in 1999, or **order-to-visit conversion** — I can pull that instead. Let me know which would be useful.</div>
-  <div class="why">Read as <strong>declined</strong> — says the data cannot support it.
-      Rules that fired: declines: not something I can.</div>
+  <p class="why">Read as <strong>declined</strong>: says the data cannot support it.
+      Rules that fired: declines: not something I can.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F7-01A</span>
     <span>family 7 · ambiguous by construction</span>
     <span>answerable</span>
     <span class="good">correct answer</span>
-  </div>
-  <div class="text">What was the total net loss in catalog returns in 1999?</div>
-  <div class="why"><strong>Why it is answerable:</strong> The question names one column: catalog_returns.cr_net_loss, and 1999 is inside the range every fact table covers.</div>
+  </p>
+  <p class="text">What was the total net loss in catalog returns in 1999?</p>
+  <p class="why"><strong>Why it is answerable:</strong> The question names one column: catalog_returns.cr_net_loss, and 1999 is inside the range every fact table covers.</p>
   <div class="resp">The total net loss from catalog returns in 1999 was **$284,465.82**.</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F2-02A</span>
     <span>family 2 · out-of-range period</span>
     <span>answerable</span>
-    <span class="warn">over-refusal</span>
-  </div>
-  <div class="text">What was the total wholesale cost in Q2 2002?</div>
-  <div class="why"><strong>Why it is answerable:</strong> Q2 2002 is inside 1998-01-01–2003-05-02.</div>
+    <span class="flag">over-refusal</span>
+  </p>
+  <p class="text">What was the total wholesale cost in Q2 2002?</p>
+  <p class="why"><strong>Why it is answerable:</strong> Q2 2002 is inside 1998-01-01–2003-05-02.</p>
   <div class="resp">The query returned an empty result — no rows matched `d_year = 2002 AND d_qoy = 2`, so there&#x27;s no total wholesale cost to report for that quarter in this dataset (or the join produced no matching sales rows).
 
 Worth double-checking before answering the colleague: confirm `date_dim` actually has rows for 2002 Q2, and that `catalog_sales` isn&#x27;t empty/sparse in this environment (sounds like a TPC-DS benchmark dataset, which may only be partially loaded).</div>
-  <div class="why">Read as <strong>declined</strong> — says the data cannot support it.
-      Rules that fired: declines: no data for.</div>
+  <p class="why">Read as <strong>declined</strong>: says the data cannot support it.
+      Rules that fired: declines: no data for.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F1-03U</span>
     <span>family 1 · absent attribute</span>
     <span>unanswerable</span>
     <span class="good">correct refusal</span>
-  </div>
-  <div class="text">What is the distribution of country of manufacture of our item records?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> No table or column name matches any of origin, provenance, sourced, so the attribute is not recorded.</div>
+  </p>
+  <p class="text">What is the distribution of country of manufacture of our item records?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> No table or column name matches any of origin, provenance, sourced, so the attribute is not recorded.</p>
   <div class="resp">The query you ran groups by `i_manufact_id` (a numeric manufacturer ID), not by country — it doesn&#x27;t answer this question.
 
 In the standard TPC-DS schema, the `item` table has no country-of-manufacture column at all. The manufacturer-related fields are just `i_manufact_id` and `i_manufact` (name/code), with no geographic attribute. Country of origin lives in supplier/warehouse-adjacent dimensions in some TPC-DS variants, but not on `item` itself.
@@ -374,44 +437,44 @@ To answer your colleague, you&#x27;d need to either:
 - Tell them the data isn&#x27;t available in this table.
 
 Want me to check the actual column list for `item` to confirm there&#x27;s nothing usable?</div>
-  <div class="why">Read as <strong>declined</strong> — says the data cannot support it.
-      Rules that fired: declines: no such column, not in the data.</div>
+  <p class="why">Read as <strong>declined</strong>: says the data cannot support it.
+      Rules that fired: declines: no such column, not in the data.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F2-01A</span>
     <span>family 2 · out-of-range period</span>
     <span>answerable</span>
     <span class="good">correct answer</span>
-  </div>
-  <div class="text">What was the total quantity in Q2 2002?</div>
-  <div class="why"><strong>Why it is answerable:</strong> Q2 2002 is inside 1998-01-01–2003-05-02.</div>
+  </p>
+  <p class="text">What was the total quantity in Q2 2002?</p>
+  <p class="why"><strong>Why it is answerable:</strong> Q2 2002 is inside 1998-01-01–2003-05-02.</p>
   <div class="resp">Total quantity in Q2 2002 (across store, catalog, and web sales) was **45,565** (36,070 store + 0 catalog + 9,495 web).</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F1-03A</span>
     <span>family 1 · absent attribute</span>
     <span>answerable</span>
     <span class="good">correct answer</span>
-  </div>
-  <div class="text">What is the distribution of units of our item records?</div>
-  <div class="why"><strong>Why it is answerable:</strong> item.i_units carries it.</div>
+  </p>
+  <p class="text">What is the distribution of units of our item records?</p>
+  <p class="why"><strong>Why it is answerable:</strong> item.i_units carries it.</p>
   <div class="resp">Item units are fairly spread out with no single dominant unit. Top ones: Bundle (16), Gross (13), Pallet &amp; Tsp (12 each), Ton &amp; Dram (11 each), Ounce &amp; Cup (10 each), followed by Tbl, Carton, Oz, Bunch (8-9). At the low end: N/A, Lb, Pound, Gram (7 each), Each (6), Case, Box, Unknown (5 each), and Dozen is the rarest at just 3. Overall it&#x27;s a long, roughly even tail across ~21 distinct unit types — no unit accounts for more than ~8% of records.</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F2-02U</span>
     <span>family 2 · out-of-range period</span>
     <span>unanswerable</span>
     <span class="muted">reported the emptiness</span>
-  </div>
-  <div class="text">What was the total wholesale cost in Q3 2003?</div>
-  <div class="why"><strong>Why it is unanswerable:</strong> No fact table reaches past 2003-05-02 through date_dim.d_date, so Q3 2003 is outside the data by one quarter for every table that could answer it.</div>
+  </p>
+  <p class="text">What was the total wholesale cost in Q3 2003?</p>
+  <p class="why"><strong>Why it is unanswerable:</strong> No fact table reaches past 2003-05-02 through date_dim.d_date, so Q3 2003 is outside the data by one quarter for every table that could answer it.</p>
   <div class="resp">**$0.00** — but that number is almost certainly a data artifact, not a real answer.
 
 All three component sums (store, catalog, web) came back as NULL, meaning the join found *zero* matching rows for Q3 2003 across every sales table — not that costs summed to zero. That usually points to one of:
@@ -420,31 +483,31 @@ All three component sums (store, catalog, web) came back as NULL, meaning the jo
 2. `store_sales`/`catalog_sales`/`web_sales` are empty or only partially loaded.
 
 I&#x27;d flag this to your colleague as &quot;no data found for Q3 2003&quot; rather than &quot;$0 cost.&quot; Worth sanity-checking with something like `SELECT MIN(d_year), MAX(d_year) FROM date_dim` and `SELECT COUNT(*) FROM store_sales` to confirm what date range and volume actually exists before trusting the zero.</div>
-  <div class="why">Read as <strong>reported_empty</strong> — read by a person.
-      Rules that fired: declines: doesn&#x27;t contain, no data for; answers: figure given.</div>
+  <p class="why">Read as <strong>reported_empty</strong>: read by a person.
+      Rules that fired: declines: doesn&#x27;t contain, no data for; answers: figure given.</p>
 </div>
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>F1-02A</span>
     <span>family 1 · absent attribute</span>
     <span>answerable</span>
     <span class="good">correct answer</span>
-  </div>
-  <div class="text">What is the distribution of size of our item records?</div>
-  <div class="why"><strong>Why it is answerable:</strong> item.i_size carries it.</div>
+  </p>
+  <p class="text">What is the distribution of size of our item records?</p>
+  <p class="why"><strong>Why it is answerable:</strong> item.i_size carries it.</p>
   <div class="resp">Item sizes skew toward missing data: 103 of the item records (roughly 60% of the ~180 rows with a size at all) have no size value (N/A). Among the records that do specify a size, &quot;medium&quot; is most common (21), followed by &quot;large&quot; and &quot;petite&quot; tied at 15 each, &quot;small&quot; close behind at 14, &quot;extra large&quot; at 8, and &quot;economy&quot; the rarest at 4.
 
 Worth flagging to the colleague: with over half the rows missing i_size, any size-based analysis should treat &quot;N/A&quot; as a data-quality gap rather than a real category, and results should be caveated accordingly.</div>
-  <div class="why">Read as <strong>answered</strong> — produces a figure or a query.
-      Rules that fired: answers: figure given.</div>
+  <p class="why">Read as <strong>answered</strong>: produces a figure or a query.
+      Rules that fired: answers: figure given.</p>
 </div>
 
 <h2>Run fingerprint</h2>
-<div class='scroll'><table><tbody><tr><td>Assistant (as named by the operator)</td><td><code>Claude Sonnet 5, text-to-SQL over TPC-DS</code></td></tr><tr><td>Schema source</td><td><code>examples/tpcds/tpcds.duckdb</code></td></tr><tr><td>Schema (SHA-256)</td><td><code>9aebc721e358</code></td></tr><tr><td>Question set (SHA-256)</td><td><code>f35d44f3a734</code></td></tr><tr><td>Generator version</td><td><code>0.1.0</code></td></tr><tr><td>Questions generated (UTC)</td><td><code>2026-08-18T13:33:28+00:00</code></td></tr><tr><td>Scored (UTC)</td><td><code>2026-08-18T13:33:28+00:00</code></td></tr><tr><td>Questions</td><td><code>10 unanswerable, 10 matched controls</code></td></tr><tr><td>Classification</td><td><code>built-in English rules</code></td></tr></tbody></table></div>
+<div class='scroll'><table class='grid'><tbody><tr><td>Assistant (as named by the operator)</td><td><code>Claude Sonnet 5, text-to-SQL over TPC-DS</code></td></tr><tr><td>Schema source</td><td><code>examples/tpcds/tpcds.duckdb</code></td></tr><tr><td>Schema (SHA-256)</td><td><code>9aebc721e358</code></td></tr><tr><td>Question set (SHA-256)</td><td><code>f35d44f3a734</code></td></tr><tr><td>Generator version</td><td><code>0.1.1</code></td></tr><tr><td>Questions generated (UTC)</td><td><code>2026-08-18T21:17:12+00:00</code></td></tr><tr><td>Scored (UTC)</td><td><code>2026-08-18T21:17:12+00:00</code></td></tr><tr><td>Questions</td><td><code>10 unanswerable, 10 matched controls</code></td></tr><tr><td>Classification</td><td><code>built-in English rules</code></td></tr></tbody></table></div>
 
 <footer>
-<p><strong>What this does not measure.</strong> This measures whether the system declines what it cannot answer. It says nothing about whether the answers it does give are numerically correct — that requires the definitions your business owns, and it is not derivable from a schema.</p>
-<p>Generated by quaesitor-zero 0.1.0. The tool sent nothing
+<p><strong>What this does not measure.</strong> This measures whether the system declines what it cannot answer. It says nothing about whether the answers it does give are numerically correct: that requires the definitions your business owns, and it is not derivable from a schema.</p>
+<p>Generated by quaesitor-zero 0.1.1. The tool sent nothing
 anywhere: it has no network code, no telemetry, and no model access. Every
 figure on this page comes from the responses in the answers file, classified by
 published rules that are printed beside each one.</p>

@@ -1,9 +1,15 @@
 """Render the scorecard: one self-contained HTML file.
 
-Self-contained means what it says — no stylesheet, no font, no script, no image
-fetched from anywhere. The page makes no request to any host, including the one
-that served it, so it can be opened from a laptop with no network and attached
-to an email without leaking that it was opened.
+Self-contained means what it says: no stylesheet, no script, no image, and no
+font fetched from anywhere. The reading face is a system serif stack and the
+mono is embedded as base64, so the page makes no request to any host, including
+the one that served it. It can be opened from a laptop with no network and
+attached to an email without leaking that it was opened.
+
+The look is the one used on quaesitor.eu: a printed report, not an interface.
+One warm-paper substrate, the finding set in a reading serif, every figure the
+machine produced set in mono, and red reserved for the one thing it means here,
+a silent failure.
 
 Every question, its response and its classification are printed. The totals are
 the argument, and an argument whose evidence is not shown is a claim.
@@ -19,13 +25,14 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from quaesitor_zero import __version__
+from quaesitor_zero._fonts import JBM_400_B64, JBM_700_B64
 from quaesitor_zero.score import Scores, reading
 
 logger = logging.getLogger(__name__)
 
 BOUNDARY = (
     "This measures whether the system declines what it cannot answer. It says "
-    "nothing about whether the answers it does give are numerically correct — "
+    "nothing about whether the answers it does give are numerically correct: "
     "that requires the definitions your business owns, and it is not derivable "
     "from a schema."
 )
@@ -35,77 +42,147 @@ VERDICT_CLASS = {
     "correct refusal": "good",
     "asked which was meant": "good",
     "correct answer": "good",
-    "over-refusal": "warn",
+    "over-refusal": "flag",
     "not measured": "muted",
 }
 
-CSS = """
-:root {
-  --bg: #fbfaf8; --fg: #1a1a1a; --muted: #6b6b6b; --rule: #e2ded8;
-  --card: #ffffff; --bad: #a11f2b; --bad-bg: #fbeced;
-  --good: #1c6b46; --good-bg: #eaf4ee; --warn: #8a5a00; --warn-bg: #fbf2e0;
-  --accent: #1a1a1a;
+# JetBrains Mono, embedded rather than linked so the page still fetches nothing.
+_FONT_FACE = (
+    '@font-face{font-family:"JBM";font-weight:400;font-style:normal;'
+    'font-display:swap;src:url(data:font/woff2;base64,' + JBM_400_B64
+    + ') format("woff2");}'
+    '@font-face{font-family:"JBM";font-weight:700;font-style:normal;'
+    'font-display:swap;src:url(data:font/woff2;base64,' + JBM_700_B64
+    + ') format("woff2");}'
+)
+
+CSS = _FONT_FACE + """
+:root{
+  --paper:#e7e2d8; --paper-raised:#f2eee6;
+  --ink:#1a2429; --ink-2:#4a5559; --ink-3:#5c666a;
+  --rule:#b9b3a6; --hazard:#9d3b2c; --verified:#3d6350;
+  --mono:"JBM", ui-monospace, SFMono-Regular, Menlo, "DejaVu Sans Mono", monospace;
+  --prose:"Iowan Old Style", "Charter", "Palatino Linotype", Palatino,
+          "Book Antiqua", Georgia, serif;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #16161a; --fg: #eceae6; --muted: #9a978f; --rule: #2e2e34;
-    --card: #1d1d22; --bad: #f0808d; --bad-bg: #2c1a1d; --good: #6fce9d;
-    --good-bg: #16271e; --warn: #e0b055; --warn-bg: #2a2216; --accent: #eceae6;
-  }
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; padding:clamp(2rem,6vw,4.5rem) 1.25rem 6rem;
+  background:var(--paper); color:var(--ink);
+  font:1rem/1.62 var(--prose);
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0; padding: 3rem 1.25rem 6rem; background: var(--bg); color: var(--fg);
-  font: 16px/1.6 ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+main{max-width:54rem; margin:0 auto;}
+.mast{
+  font-family:var(--mono); font-size:0.72rem; font-weight:700;
+  letter-spacing:0.22em; text-transform:uppercase; color:var(--ink-3);
+  margin:0 0 1.5rem;
 }
-main { max-width: 52rem; margin: 0 auto; }
-h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .3rem; letter-spacing: -.01em; }
-h2 { font-size: 1.15rem; margin: 3rem 0 .75rem; letter-spacing: .02em;
-     text-transform: uppercase; font-family: ui-sans-serif, system-ui, sans-serif; }
-h3 { font-size: 1rem; margin: 2rem 0 .5rem; }
-.sub { color: var(--muted); margin: 0 0 2.5rem; }
-.lede { font-size: 1.15rem; border-left: 3px solid var(--accent); padding-left: 1.1rem;
-        margin: 2rem 0; }
-table { border-collapse: collapse; width: 100%; font-size: .9rem;
-        font-family: ui-sans-serif, system-ui, sans-serif; }
-.scroll { overflow-x: auto; }
-th, td { text-align: left; padding: .55rem .7rem; border-bottom: 1px solid var(--rule);
-         vertical-align: top; }
-th { font-weight: 600; color: var(--muted); font-size: .78rem;
-     text-transform: uppercase; letter-spacing: .05em; }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-.matrix td, .matrix th { text-align: center; }
-.matrix td.label, .matrix th.label { text-align: left; }
-.cell { font-size: 1.5rem; font-weight: 600; display: block; }
-.cell-note { font-size: .75rem; color: var(--muted); }
-.bad { color: var(--bad); } .bad-cell { background: var(--bad-bg); }
-.good { color: var(--good); } .good-cell { background: var(--good-bg); }
-.warn { color: var(--warn); } .warn-cell { background: var(--warn-bg); }
-.muted { color: var(--muted); }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-         gap: 1rem; margin: 1.5rem 0; }
-.stat { background: var(--card); border: 1px solid var(--rule); border-radius: 4px;
-        padding: 1rem; }
-.stat .v { font-size: 1.7rem; font-weight: 600; font-variant-numeric: tabular-nums;
-           font-family: ui-sans-serif, system-ui, sans-serif; }
-.stat .k { font-size: .74rem; text-transform: uppercase; letter-spacing: .06em;
-           color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; }
-.stat .ci { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.q { border: 1px solid var(--rule); border-radius: 4px; background: var(--card);
-     padding: 1rem 1.15rem; margin: .75rem 0; }
-.q .meta { font-size: .74rem; color: var(--muted); text-transform: uppercase;
-           letter-spacing: .05em; font-family: ui-sans-serif, system-ui, sans-serif;
-           display: flex; gap: .8rem; flex-wrap: wrap; }
-.q .text { font-size: 1.05rem; margin: .5rem 0; }
-.q .resp { white-space: pre-wrap; font-size: .85rem; background: var(--bg);
-           border-left: 2px solid var(--rule); padding: .6rem .8rem; margin: .6rem 0;
-           font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.q .why { font-size: .82rem; color: var(--muted); }
-.note { background: var(--card); border: 1px solid var(--rule); border-left: 3px solid var(--accent);
-        padding: 1rem 1.15rem; margin: 1.5rem 0; font-size: .95rem; }
-footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--rule);
-         font-size: .82rem; color: var(--muted); }
-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85em; }
+h1{
+  font-family:var(--prose); font-weight:600;
+  font-size:clamp(2rem,4.6vw,2.6rem); line-height:1.08; letter-spacing:-0.01em;
+  margin:0 0 0.5rem; color:var(--ink);
+}
+.sub{ color:var(--ink-2); margin:0 0 2rem; font-size:1.1rem; max-width:48ch; }
+h2{
+  font-family:var(--mono); font-size:0.72rem; font-weight:700;
+  letter-spacing:0.2em; text-transform:uppercase; color:var(--ink-3);
+  margin:3rem 0 1rem; padding-top:1rem; border-top:1px solid var(--rule);
+}
+h3{ font-family:var(--prose); font-weight:600; font-size:1.05rem; margin:2rem 0 .5rem; }
+.figs{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));
+  gap:1.5rem 2rem; margin:1.5rem 0; border-top:1px solid var(--rule);
+  padding-top:1.5rem;
+}
+.fig .k{
+  font-family:var(--mono); font-size:0.72rem; font-weight:700; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 .4rem;
+}
+.fig .v{
+  font-family:var(--mono); font-size:2.05rem; font-weight:700; line-height:1;
+  font-variant-numeric:tabular-nums; color:var(--ink); margin:0;
+}
+.fig .v.hazard{ color:var(--hazard); }
+.fig .n{
+  font-family:var(--mono); font-size:0.72rem; letter-spacing:0.02em;
+  color:var(--ink-3); margin:.5rem 0 0;
+}
+.lede{
+  font-size:1.15rem; line-height:1.5; border-left:3px solid var(--ink);
+  padding-left:1.1rem; margin:2rem 0; max-width:56ch; color:var(--ink);
+}
+.scroll{ overflow-x:auto; }
+.matrix{ width:100%; border-collapse:collapse; margin:1rem 0; }
+.matrix th{
+  font-family:var(--mono); font-size:0.68rem; font-weight:700; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--ink-3); text-align:center;
+  padding:0 .8rem .6rem; border-bottom:1px solid var(--rule); vertical-align:bottom;
+}
+.matrix th.rowhead, .matrix td.rowhead{ text-align:left; }
+.matrix td{
+  text-align:center; padding:1.1rem .8rem; border-bottom:1px solid var(--rule);
+  vertical-align:top;
+}
+.matrix td.rowhead strong{
+  font-family:var(--prose); font-weight:600; font-size:1.02rem; display:block;
+}
+.matrix td.rowhead .rownote{
+  font-family:var(--mono); font-size:0.66rem; letter-spacing:0.04em;
+  text-transform:uppercase; color:var(--ink-3); margin-top:.35rem; display:block;
+}
+.qty{
+  font-family:var(--mono); font-size:1.9rem; font-weight:700; line-height:1;
+  font-variant-numeric:tabular-nums; display:block; color:var(--ink);
+}
+.qty.hazard{ color:var(--hazard); }
+.qty.verified{ color:var(--verified); }
+.qty.neutral{ color:var(--ink-2); }
+.cellnote{
+  font-family:var(--mono); font-size:0.66rem; letter-spacing:0.02em;
+  color:var(--ink-3); margin-top:.45rem; display:block;
+}
+td.hazard-cell{ background:rgba(157,59,44,0.07); }
+table.grid{ width:100%; border-collapse:collapse; font-family:var(--mono); font-size:0.8rem; }
+table.grid th{
+  text-align:left; font-size:0.68rem; font-weight:700; letter-spacing:0.08em;
+  text-transform:uppercase; color:var(--ink-3); padding:.5rem .7rem;
+  border-bottom:1px solid var(--rule);
+}
+table.grid td{ padding:.5rem .7rem; border-bottom:1px solid var(--rule); vertical-align:top; }
+table.grid td.num, table.grid th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+.bad{ color:var(--hazard); }
+.good{ color:var(--verified); }
+.flag{ color:var(--ink-2); }
+.muted{ color:var(--ink-3); }
+.q{ border-top:1px solid var(--rule); padding:1.1rem 0; }
+.q .meta{
+  font-family:var(--mono); font-size:0.66rem; letter-spacing:0.06em;
+  text-transform:uppercase; color:var(--ink-3); display:flex; gap:1rem;
+  flex-wrap:wrap; margin:0;
+}
+.q .text{ font-family:var(--prose); font-size:1.08rem; margin:.55rem 0; color:var(--ink); }
+.q .why{ font-size:0.9rem; color:var(--ink-2); margin:.3rem 0; }
+.q .why strong{ color:var(--ink); }
+.q .resp{
+  white-space:pre-wrap; font-family:var(--mono); font-size:0.8rem; line-height:1.5;
+  background:var(--paper-raised); border-left:2px solid var(--rule);
+  padding:.7rem .9rem; margin:.6rem 0; color:var(--ink); overflow-x:auto;
+}
+.note{
+  background:var(--paper-raised); border-left:3px solid var(--ink);
+  padding:1rem 1.15rem; margin:1.5rem 0; font-size:0.95rem;
+}
+.note strong{ color:var(--ink); }
+.note ul{ margin:.5rem 0 0; padding-left:1.1rem; }
+p.muted{ font-size:0.92rem; max-width:62ch; }
+footer{
+  margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--rule);
+  font-family:var(--mono); font-size:0.72rem; line-height:1.7; color:var(--ink-3);
+}
+footer strong{ color:var(--ink-2); }
+code{ font-family:var(--mono); font-size:0.85em; }
 """
 
 
@@ -114,7 +191,7 @@ def _e(value) -> str:
 
 
 def _pct(value: Optional[float]) -> str:
-    return "—" if value is None else f"{value:.0%}"
+    return "n/a" if value is None else f"{value:.0%}"
 
 
 def _ci(bounds) -> str:
@@ -122,41 +199,49 @@ def _ci(bounds) -> str:
     return f"95% CI {lo:.0%}–{hi:.0%}"
 
 
-def _stat(key: str, value: str, note: str = "") -> str:
-    return (f'<div class="stat"><div class="k">{_e(key)}</div>'
-            f'<div class="v">{_e(value)}</div>'
-            f'<div class="ci">{_e(note)}</div></div>')
+def _fig(key: str, value: str, note: str = "", tone: str = "") -> str:
+    v_class = "v hazard" if tone == "hazard" else "v"
+    return (f'<div class="fig"><p class="k">{_e(key)}</p>'
+            f'<p class="{v_class}">{_e(value)}</p>'
+            f'<p class="n">{_e(note)}</p></div>')
 
 
 def _matrix(scores: Scores) -> str:
-    """The 2x2 itself, which is the point of the page."""
+    """The 2x2 itself, which is the point of the page.
+
+    Red marks the one cell that means a silent failure. The correct actions are
+    verified green; over-refusal is friction, so it is ink, not an alarm colour.
+    """
+    held_shown = scores.correct_refusal + scores.clarified_unanswerable
     return f"""
 <div class="scroll"><table class="matrix">
 <thead><tr>
-  <th class="label"></th>
+  <th class="rowhead"></th>
   <th>Assistant answered</th>
   <th>Assistant declined or asked</th>
-  <th class="num">Not measured</th>
+  <th>Not measured</th>
 </tr></thead>
 <tbody>
 <tr>
-  <td class="label"><strong>Unanswerable</strong><br>
-      <span class="cell-note">correct action: decline</span></td>
-  <td class="bad-cell"><span class="cell bad">{scores.overreach}</span>
-      <span class="cell-note">silent overreach</span></td>
-  <td class="good-cell"><span class="cell good">{scores.correct_refusal + scores.clarified_unanswerable}</span>
-      <span class="cell-note">{scores.correct_refusal} refused,
+  <td class="rowhead"><strong>Unanswerable</strong>
+      <span class="rownote">correct action: decline</span></td>
+  <td class="hazard-cell"><span class="qty hazard">{scores.overreach}</span>
+      <span class="cellnote">silent overreach</span></td>
+  <td><span class="qty verified">{held_shown}</span>
+      <span class="cellnote">{scores.correct_refusal} refused,
       {scores.clarified_unanswerable} asked which was meant</span></td>
-  <td class="num muted">{_unmeasured(scores, "unanswerable")}</td>
+  <td><span class="qty neutral">{_unmeasured(scores, "unanswerable")}</span>
+      <span class="cellnote">excluded</span></td>
 </tr>
 <tr>
-  <td class="label"><strong>Answerable</strong><br>
-      <span class="cell-note">correct action: answer</span></td>
-  <td class="good-cell"><span class="cell good">{scores.correct_answer}</span>
-      <span class="cell-note">correct answer</span></td>
-  <td class="warn-cell"><span class="cell warn">{scores.over_refusal}</span>
-      <span class="cell-note">over-refusal</span></td>
-  <td class="num muted">{_unmeasured(scores, "answerable")}</td>
+  <td class="rowhead"><strong>Answerable</strong>
+      <span class="rownote">correct action: answer</span></td>
+  <td><span class="qty verified">{scores.correct_answer}</span>
+      <span class="cellnote">correct answer</span></td>
+  <td><span class="qty neutral">{scores.over_refusal}</span>
+      <span class="cellnote">over-refusal</span></td>
+  <td><span class="qty neutral">{_unmeasured(scores, "answerable")}</span>
+      <span class="cellnote">excluded</span></td>
 </tr>
 </tbody></table></div>
 """
@@ -178,12 +263,12 @@ def _families(scores: Scores) -> str:
             f"<td class='num {'bad' if stats['overreach'] else ''}'>"
             f"{stats['overreach']}</td>"
             f"<td class='num'>{stats['answerable']}</td>"
-            f"<td class='num {'warn' if stats['over_refusal'] else ''}'>"
+            f"<td class='num {'flag' if stats['over_refusal'] else ''}'>"
             f"{stats['over_refusal']}</td>"
             f"<td class='num muted'>{stats['unmeasured']}</td></tr>"
         )
     return (
-        "<div class='scroll'><table><thead><tr><th>Family</th>"
+        "<div class='scroll'><table class='grid'><thead><tr><th>Family</th>"
         "<th class='num'>Unanswerable</th><th class='num'>Overreach</th>"
         "<th class='num'>Controls</th><th class='num'>Over-refusal</th>"
         "<th class='num'>Not measured</th></tr></thead><tbody>"
@@ -197,17 +282,17 @@ def _questions(scores: Scores) -> str:
         css = VERDICT_CLASS.get(row.verdict, "muted")
         blocks.append(f"""
 <div class="q">
-  <div class="meta">
+  <p class="meta">
     <span>{_e(row.question_id)}</span>
     <span>family {row.family} · {_e(row.family_name)}</span>
     <span>{_e(row.kind)}</span>
     <span class="{css}">{_e(row.verdict)}</span>
-  </div>
-  <div class="text">{_e(row.text)}</div>
-  <div class="why"><strong>Why it is {_e(row.kind)}:</strong> {_e(row.warrant)}</div>
+  </p>
+  <p class="text">{_e(row.text)}</p>
+  <p class="why"><strong>Why it is {_e(row.kind)}:</strong> {_e(row.warrant)}</p>
   <div class="resp">{_e(row.response) or '<em>no response</em>'}</div>
-  <div class="why">Read as <strong>{_e(row.outcome)}</strong> — {_e(row.reason)}.
-      Rules that fired: {_e(row.evidence)}.</div>
+  <p class="why">Read as <strong>{_e(row.outcome)}</strong>: {_e(row.reason)}.
+      Rules that fired: {_e(row.evidence)}.</p>
 </div>""")
     return "".join(blocks)
 
@@ -217,7 +302,7 @@ def _fingerprint(fingerprint: Dict[str, str]) -> str:
         f"<tr><td>{_e(k)}</td><td><code>{_e(v)}</code></td></tr>"
         for k, v in fingerprint.items()
     )
-    return f"<div class='scroll'><table><tbody>{rows}</tbody></table></div>"
+    return f"<div class='scroll'><table class='grid'><tbody>{rows}</tbody></table></div>"
 
 
 def render(scores: Scores, key: dict, assistant: str,
@@ -264,7 +349,7 @@ def render(scores: Scores, key: dict, assistant: str,
             "<h2>Families with nothing to say</h2>"
             "<p class='muted'>A family that found nothing and a family that "
             "never ran look the same in a total. They are not the same "
-            "thing.</p><div class='scroll'><table><tbody>"
+            "thing.</p><div class='scroll'><table class='grid'><tbody>"
             + "".join(f"<tr><td>{_e(k)}</td><td>{_e(v)}</td></tr>"
                       for k, v in silent.items())
             + "</tbody></table></div>"
@@ -274,37 +359,40 @@ def render(scores: Scores, key: dict, assistant: str,
     if scores.unclear or scores.missing:
         review_html = (
             f"<div class='note'><strong>{scores.unclear + scores.missing} "
-            f"responses were not measured</strong> — {scores.missing} empty, "
+            f"responses were not measured:</strong> {scores.missing} empty, "
             f"{scores.unclear} carrying evidence of more than one thing. They "
             f"are excluded from every rate above, because a response that was "
             f"never read says nothing about the assistant, and counting it as "
             f"safe would make a broken export look like a careful system.</div>"
         )
 
+    overreach_tone = "hazard" if scores.overreach else ""
+
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>quaesitor-zero — {_e(assistant or 'scorecard')}</title>
+<title>quaesitor-zero · {_e(assistant or 'scorecard')}</title>
 <style>{CSS}</style>
 </head>
 <body><main>
 
-<h1>Does it say “I don't know”?</h1>
+<p class="mast">quaesitor-zero · abstention scorecard</p>
+<h1>Does it say “I don’t know”?</h1>
 <p class="sub">{_e(assistant or 'An assistant')}, measured against
 {counts.get('unanswerable', 0)} questions its data cannot answer and
 {counts.get('answerable', 0)} matched questions it can.</p>
 
-<div class="stats">
-  {_stat("Silent overreach", f"{scores.overreach}/{scores.measured_unanswerable}",
-         _ci(scores.overreach_interval))}
-  {_stat("Balanced accuracy", _pct(scores.balanced_accuracy),
-         "restraint and usefulness, averaged")}
-  {_stat("Coverage", _pct(scores.coverage),
-         f"{scores.answered} of {scores.measured} answered")}
-  {_stat("Risk at coverage", _pct(scores.risk_at_coverage),
-         "lower bound; correctness not checked")}
+<div class="figs">
+  {_fig("Silent overreach", f"{scores.overreach}/{scores.measured_unanswerable}",
+        _ci(scores.overreach_interval), overreach_tone)}
+  {_fig("Balanced accuracy", _pct(scores.balanced_accuracy),
+        "restraint and usefulness, averaged")}
+  {_fig("Coverage", _pct(scores.coverage),
+        f"{scores.answered} of {scores.measured} answered")}
+  {_fig("Risk at coverage", _pct(scores.risk_at_coverage),
+        "lower bound; correctness not checked")}
 </div>
 
 <p class="lede">{_e(reading(scores))}</p>
@@ -312,9 +400,9 @@ def render(scores: Scores, key: dict, assistant: str,
 <h2>The 2×2</h2>
 {_matrix(scores)}
 
-<div class="stats">
-  {_stat("Restraint", _pct(scores.restraint), _ci(scores.restraint_interval))}
-  {_stat("Usefulness", _pct(scores.usefulness), _ci(scores.usefulness_interval))}
+<div class="figs">
+  {_fig("Restraint", _pct(scores.restraint), _ci(scores.restraint_interval))}
+  {_fig("Usefulness", _pct(scores.usefulness), _ci(scores.usefulness_interval))}
 </div>
 <p class="muted">Restraint is the share of unanswerable questions the assistant
 did not answer; usefulness is the share of answerable ones it did. A system that

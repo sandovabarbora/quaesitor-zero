@@ -1,4 +1,19 @@
-# quaesitor-zero
+<p align="center">
+  <a href="https://quaesitor.eu">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/quaesitor-dark.png">
+      <img alt="Quaesitor" src="docs/quaesitor.png" width="360">
+    </picture>
+  </a>
+</p>
+
+<h1 align="center">quaesitor-zero</h1>
+
+<p align="center">
+  <a href="https://pypi.org/project/quaesitor-zero/"><img alt="PyPI" src="https://img.shields.io/pypi/v/quaesitor-zero.svg"></a>
+  <a href="https://pypi.org/project/quaesitor-zero/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/quaesitor-zero.svg"></a>
+  <a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
+</p>
 
 **On TPC-DS — a public standard schema, with the data in front of it — a
 frontier model answered 3 of 10 questions that have no answer.** Every one of
@@ -109,6 +124,8 @@ Rules are English by default and replaceable with `--lexicon rules.json`.
 
 ## The scorecard
 
+![Example scorecard from a real TPC-DS run](docs/scorecard.png)
+
 One self-contained HTML file: the 2×2 with Wilson intervals, balanced accuracy,
 coverage, risk at coverage, every question with its response and its
 classification, and a run fingerprint — schema digest, question-set digest,
@@ -142,7 +159,8 @@ it reproduces with no warehouse of your own and no model access.
 ## Install
 
 ```bash
-uv tool install quaesitor-zero      # or: pipx install quaesitor-zero
+uvx --from git+https://github.com/sandovabarbora/quaesitor-zero quaesitor-zero   # from source, works today
+uv tool install quaesitor-zero      # or: pipx install quaesitor-zero  (once on PyPI)
 ```
 
 Python 3.10+, one dependency (DuckDB), Apache-2.0.

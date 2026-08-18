@@ -1,6 +1,6 @@
 [project]
 name = "quaesitor-zero"
-version = "0.1.0"
+version = "0.1.1"
 description = "Does your data assistant say \"I don't know\" when it cannot know?"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,7 +28,7 @@ quaesitor-zero = "quaesitor_zero.cli:main"
 
 [project.urls]
 Homepage = "https://quaesitor.eu"
-Source = "https://github.com/quaesitor/quaesitor-zero"
+Source = "https://github.com/sandovabarbora/quaesitor-zero"
 
 [build-system]
 requires = ["hatchling"]
