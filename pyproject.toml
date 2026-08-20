@@ -1,6 +1,6 @@
 [project]
 name = "quaesitor-zero"
-version = "0.1.1"
+version = "0.1.2"
 description = "Does your data assistant say \"I don't know\" when it cannot know?"
 readme = "README.md"
 requires-python = ">=3.10"
