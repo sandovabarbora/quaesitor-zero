@@ -130,6 +130,8 @@ is not an error.**
 
 The command exits with status **3** and writes no scorecard.
 
+![The review step: score stops, a person decides, the re-run produces the scorecard](docs/review.gif)
+
 A response like *"I can't calculate that, as there is no emissions attribute.
 The closest figure I can give you is the total item count, which is 18,000"*
 carries evidence of declining **and** evidence of producing a figure. No rule
@@ -149,6 +151,12 @@ So it hands those rows to you. The four outcomes:
 That last one is why a person is needed. It is the difference between an
 assistant that returned zero and an assistant that returned zero and told you
 zero means "no rows", and no rule can read that reliably.
+
+`review.csv` is RFC 4180 CSV with CRLF line endings, which is what a
+spreadsheet expects and what `csv` in most languages writes. Open it in a
+spreadsheet, or edit it with something CSV-aware. A quick `sed` on the last
+column will appear to work and silently change nothing, because the line ends
+after the carriage return rather than after the comma.
 
 Then:
 

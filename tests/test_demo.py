@@ -13,6 +13,8 @@ is the failure this whole project measures, printed on its own front page.
 import re
 from pathlib import Path
 
+import pytest
+
 from quaesitor_zero.cli import main
 
 README = Path(__file__).resolve().parent.parent / "README.md"
@@ -173,12 +175,35 @@ def test_every_local_link_in_the_readme_resolves():
     assert not broken, f"the README points at files that are not there: {broken}"
 
 
-def test_the_recording_is_reproducible_from_a_checked_in_tape():
-    """The GIF is an artefact. The thing that makes it must be in the repo, or
-    the next person cannot regenerate it after the output changes."""
-    root = Path(__file__).resolve().parent.parent
-    tape = root / "docs" / "demo.tape"
-    assert tape.exists(), "docs/demo.gif exists with no tape to rebuild it from"
-    text = tape.read_text(encoding="utf-8")
-    assert "quaesitor-zero demo" in text
-    assert "Output docs/demo.gif" in text
+@pytest.mark.parametrize("gif,tape,command", [
+    ("demo.gif", "demo.tape", "quaesitor-zero demo"),
+    ("review.gif", "review.tape", "--review review.csv"),
+])
+def test_each_recording_is_reproducible_from_a_checked_in_tape(gif, tape, command):
+    """A GIF is an artefact. What makes it has to be in the repository, or the
+    next person cannot regenerate it once the output moves."""
+    docs = Path(__file__).resolve().parent.parent / "docs"
+    assert (docs / gif).exists(), f"{gif} is referenced but not present"
+    assert (docs / tape).exists(), f"{gif} exists with no tape to rebuild it from"
+    text = (docs / tape).read_text(encoding="utf-8")
+    assert f"Output docs/{gif}" in text
+    assert command in text, f"{tape} no longer records {command!r}"
+
+
+def test_the_review_recording_has_its_scenario_script():
+    """The review GIF needs a prepared answers file. If the script that makes
+    one is missing, the recording cannot be reproduced and becomes a claim."""
+    docs = Path(__file__).resolve().parent.parent / "docs"
+    setup = docs / "review-setup.sh"
+    assert setup.exists(), "review.tape depends on a scenario nobody can rebuild"
+    assert "quaesitor-zero generate" in setup.read_text(encoding="utf-8")
+
+
+def test_the_howto_warns_about_the_line_endings():
+    """review.csv is CRLF, so a sed on the last column silently does nothing.
+
+    Found while recording the review step: the obvious one-liner appeared to
+    work and changed the file not at all.
+    """
+    howto = Path(__file__).resolve().parent.parent / "HOWTO.md"
+    assert "CRLF" in howto.read_text(encoding="utf-8")
