@@ -204,15 +204,28 @@ def test_the_hero_recording_has_its_build_script():
     assert (docs / "hero.gif").exists(), "the README's hero image is not present"
     text = build.read_text(encoding="utf-8")
     assert "vhs docs/demo.tape" in text
-    assert "scorecard.png" in text, "the build no longer holds the scorecard"
+    assert "scorecard-full.png" in text, "the build no longer holds the scorecard"
     assert "-y docs/hero.gif" in text, "the build no longer writes hero.gif"
 
 
-def test_the_scorecard_image_is_kept_even_though_the_readme_dropped_it():
-    """The hero GIF is built from it. Deleting it as unused breaks the build."""
+def test_the_scorecard_images_are_kept_even_though_the_readme_dropped_them():
+    """The hero GIF is built from the full-height one, and HOWTO still shows a
+    scorecard. Deleting either as unused breaks something quietly."""
     docs = Path(__file__).resolve().parent.parent / "docs"
-    assert (docs / "scorecard.png").exists(), (
-        "docs/build-demo.sh needs scorecard.png to hold at the end of the GIF")
+    assert (docs / "scorecard-full.png").exists(), (
+        "docs/build-demo.sh needs scorecard-full.png to scroll through")
+
+
+def test_the_hero_ends_on_the_document_not_on_a_filename():
+    """The terminal says `scorecard: scorecard.html` and stops, which is a
+    promise. The recording opens it and reads through it."""
+    docs = Path(__file__).resolve().parent.parent / "docs"
+    tape = (docs / "demo.tape").read_text(encoding="utf-8")
+    assert "open scorecard.html" in tape, (
+        "the recording no longer opens the scorecard before the cut")
+    # Six held windows plus the terminal: comfortably longer than the terminal
+    # segment on its own.
+    assert (docs / "hero.gif").stat().st_size > (docs / "demo.gif").stat().st_size
 
 
 def test_the_review_recording_has_its_scenario_script():

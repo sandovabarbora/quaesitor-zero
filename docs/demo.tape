@@ -25,4 +25,8 @@ Type "quaesitor-zero demo"
 Sleep 400ms
 Enter
 Sleep 4s
-Sleep 1500ms
+
+Type "open scorecard.html"
+Sleep 400ms
+Enter
+Sleep 1600ms
