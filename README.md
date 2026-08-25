@@ -83,6 +83,10 @@ revenue means for the question to be unanswerable.
 | 7 | Ambiguous by construction | several columns for one business word |
 | 8 | Absent population | distinct values of a filter column |
 
+[HOWTO.md](HOWTO.md) is the procedure end to end: getting your schema out of
+Postgres or Snowflake, what to paste where, the review step that stops the
+scorer, and how to read the result.
+
 [FAMILIES.md](FAMILIES.md) is the specification: what each family is, how the
 generator decides, and where each one can be wrong. It is the intellectual
 content of this tool, and it is worth reading before quoting a number from it.

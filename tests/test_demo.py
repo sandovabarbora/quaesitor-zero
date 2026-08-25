@@ -97,3 +97,59 @@ def test_the_two_places_the_version_is_written_agree():
     assert packaged == source, (
         f"pyproject says {packaged} and __init__ says {source}; a release "
         "would report the wrong version of itself")
+
+
+def test_the_howto_documents_the_review_exit_code():
+    """`score` exits 3 and writes no scorecard when a response is unreadable.
+
+    That looks like a failure and is not one, and until HOWTO.md existed the
+    behaviour was documented nowhere. If the code changes, the number in the
+    document has to move with it.
+    """
+    from quaesitor_zero import cli  # noqa: F401
+
+    howto = (Path(__file__).resolve().parent.parent / "HOWTO.md")
+    text = howto.read_text(encoding="utf-8")
+    assert "status **3**" in text, "the how-to no longer states the exit code"
+    for outcome in ("answered", "declined", "clarified", "reported_empty"):
+        assert f"`{outcome}`" in text, (
+            f"the how-to does not list the {outcome!r} review outcome")
+
+
+def test_the_review_step_really_does_exit_3(tmp_path):
+    """The number the how-to prints, checked against the command.
+
+    Uses the bundled key rather than a hand-built one: the key carries fields
+    the scorer needs, and inventing a fixture that happens to satisfy today's
+    reader would stop testing the real path the moment either changed.
+    """
+    import csv
+    import importlib.resources
+    import json
+
+    from quaesitor_zero.cli import main
+
+    example = importlib.resources.files("quaesitor_zero") / "_example"
+    with importlib.resources.as_file(example / "questions.key.json") as src:
+        key_text = src.read_text(encoding="utf-8")
+    key = tmp_path / "questions.key.json"
+    key.write_text(key_text, encoding="utf-8")
+    first = json.loads(key_text)["questions"][0]["id"]
+
+    # One response that both declines and produces a figure: no rule can
+    # decide which it was, which is exactly the case that needs a person.
+    answers = tmp_path / "questions.csv"
+    with answers.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["id", "question", "response"])
+        writer.writeheader()
+        writer.writerow({
+            "id": first, "question": "q",
+            "response": "I cannot answer that from this data. "
+                        "The closest figure I can give you is 18,000."})
+
+    out = tmp_path / "s.html"
+    code = main(["score", "--answers", str(answers), "--key", str(key),
+                 "--out", str(out)])
+    assert code == 3, f"the how-to says status 3; the command returned {code}"
+    assert not out.exists(), "it wrote a scorecard despite stopping for review"
+    assert (tmp_path / "review.csv").exists(), "it did not write the review file"
