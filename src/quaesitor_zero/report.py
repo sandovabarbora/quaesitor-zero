@@ -25,7 +25,13 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from quaesitor_zero import __version__
-from quaesitor_zero._fonts import JBM_400_B64, JBM_700_B64
+from quaesitor_zero._fonts import (
+    JBM_400_B64, JBM_700_B64,
+    SG_400_LATIN_B64, SG_400_LATIN_RANGE,
+    SG_400_LATIN_EXT_B64, SG_400_LATIN_EXT_RANGE,
+    SG_700_LATIN_B64, SG_700_LATIN_RANGE,
+    SG_700_LATIN_EXT_B64, SG_700_LATIN_EXT_RANGE,
+)
 from quaesitor_zero.score import Scores, reading
 
 logger = logging.getLogger(__name__)
@@ -46,24 +52,46 @@ VERDICT_CLASS = {
     "not measured": "muted",
 }
 
-# JetBrains Mono, embedded rather than linked so the page still fetches nothing.
+def _face(family: str, weight: str, b64: str, unicode_range: str = "") -> str:
+    """One @font-face rule, embedded rather than linked.
+
+    The scorecard's promise is that opening it fetches nothing from any host,
+    so both faces travel in the file. That is also what the brand asks for in
+    production, and it is what the site does with the same two typefaces.
+    """
+    rule = (f'@font-face{{font-family:"{family}";font-weight:{weight};'
+            f'font-style:normal;font-display:swap;'
+            f'src:url(data:font/woff2;base64,{b64}) format("woff2");')
+    if unicode_range:
+        rule += f'unicode-range:{unicode_range};'
+    return rule + "}"
+
+
+# JetBrains Mono for anything a machine produced, Space Grotesk for prose:
+# the pairing the brand specifies, and the same one the site uses.
 _FONT_FACE = (
-    '@font-face{font-family:"JBM";font-weight:400;font-style:normal;'
-    'font-display:swap;src:url(data:font/woff2;base64,' + JBM_400_B64
-    + ') format("woff2");}'
-    '@font-face{font-family:"JBM";font-weight:700;font-style:normal;'
-    'font-display:swap;src:url(data:font/woff2;base64,' + JBM_700_B64
-    + ') format("woff2");}'
+    _face("JBM", "400", JBM_400_B64)
+    + _face("JBM", "700", JBM_700_B64)
+    + _face("Space Grotesk", "400", SG_400_LATIN_B64, SG_400_LATIN_RANGE)
+    + _face("Space Grotesk", "400", SG_400_LATIN_EXT_B64, SG_400_LATIN_EXT_RANGE)
+    + _face("Space Grotesk", "700", SG_700_LATIN_B64, SG_700_LATIN_RANGE)
+    + _face("Space Grotesk", "700", SG_700_LATIN_EXT_B64, SG_700_LATIN_EXT_RANGE)
 )
 
 CSS = _FONT_FACE + """
 :root{
-  --paper:#e7e2d8; --paper-raised:#f2eee6;
-  --ink:#1a2429; --ink-2:#4a5559; --ink-3:#5c666a;
-  --rule:#b9b3a6; --hazard:#9d3b2c; --verified:#3d6350;
+  /* brand/BRAND.md, the 2026-08 identity. The scorecard was still on the
+     previous one: a warmer green-grey and a Palatino-ish serif, which was
+     nobody's decision by the end, just the version it was written against. */
+  --paper:#EFEBDF; --paper-raised:#F6F4EE;
+  --ink:#1C1A17; --ink-2:#6B655C; --ink-3:#6B655C;
+  --rule:#DAD6CC; --hazard:#9A3324; --blue:#4657D9;
+  /* The brand has no green. This is the one the site already uses for a
+     correct outcome in its own result grid, so the two agree. */
+  --verified:#2E6B4F;
   --mono:"JBM", ui-monospace, SFMono-Regular, Menlo, "DejaVu Sans Mono", monospace;
-  --prose:"Iowan Old Style", "Charter", "Palatino Linotype", Palatino,
-          "Book Antiqua", Georgia, serif;
+  --prose:"Space Grotesk", ui-sans-serif, system-ui, -apple-system,
+          "Helvetica Neue", Arial, sans-serif;
 }
 *{box-sizing:border-box;}
 html{-webkit-text-size-adjust:100%;}
@@ -80,7 +108,7 @@ main{max-width:54rem; margin:0 auto;}
   margin:0 0 1.5rem;
 }
 h1{
-  font-family:var(--prose); font-weight:600;
+  font-family:var(--prose); font-weight:700;
   font-size:clamp(2rem,4.6vw,2.6rem); line-height:1.08; letter-spacing:-0.01em;
   margin:0 0 0.5rem; color:var(--ink);
 }
@@ -90,7 +118,7 @@ h2{
   letter-spacing:0.2em; text-transform:uppercase; color:var(--ink-3);
   margin:3rem 0 1rem; padding-top:1rem; border-top:1px solid var(--rule);
 }
-h3{ font-family:var(--prose); font-weight:600; font-size:1.05rem; margin:2rem 0 .5rem; }
+h3{ font-family:var(--prose); font-weight:700; font-size:1.05rem; margin:2rem 0 .5rem; }
 .figs{
   display:grid; grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));
   gap:1.5rem 2rem; margin:1.5rem 0; border-top:1px solid var(--rule);
@@ -126,7 +154,7 @@ h3{ font-family:var(--prose); font-weight:600; font-size:1.05rem; margin:2rem 0 
   vertical-align:top;
 }
 .matrix td.rowhead strong{
-  font-family:var(--prose); font-weight:600; font-size:1.02rem; display:block;
+  font-family:var(--prose); font-weight:700; font-size:1.02rem; display:block;
 }
 .matrix td.rowhead .rownote{
   font-family:var(--mono); font-size:0.66rem; letter-spacing:0.04em;
