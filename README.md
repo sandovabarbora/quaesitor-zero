@@ -22,6 +22,14 @@ unsupported. It also declined 2 of 10 questions it could answer.
 
 Does your data assistant say *"I don't know"* when it cannot know?
 
+See what it produces first — a real scorecard on public TPC-DS data, no setup:
+
+```bash
+uvx quaesitor-zero demo
+```
+
+Then run it on your own assistant:
+
 ```bash
 uvx quaesitor-zero generate --schema schema.sql --out questions.csv
 # ask your assistant the questions, paste each response into the CSV

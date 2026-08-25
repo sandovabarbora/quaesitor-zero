@@ -1,8 +1,16 @@
-"""The two commands: generate a question set, score the answers.
+"""The two commands, and a third that needs nothing of your own.
 
+    quaesitor-zero demo
+    ... or, on your own assistant ...
     quaesitor-zero generate --schema schema.sql --out questions.csv
     ... ask your assistant the questions, paste each response into the CSV ...
     quaesitor-zero score --answers questions.csv --out scorecard.html
+
+`demo` scores a worked example bundled inside the package. It exists because
+the first question anyone has is what the scorecard looks like, and answering
+it used to require a schema, an assistant and twenty pasted responses. It runs
+the same read, classify, score and report path as `score` — a demo that took a
+shortcut past the real code would be showing something the tool does not do.
 
 There is no `run` command, and that is the design rather than an omission.
 Running it would need credentials for an assistant whose API is different in
@@ -15,6 +23,7 @@ References:
 
 import argparse
 import csv
+import importlib.resources
 import logging
 import sys
 from pathlib import Path
@@ -201,6 +210,50 @@ def cmd_score(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_demo(args: argparse.Namespace) -> int:
+    """Score a bundled worked example, so the scorecard can be seen with no setup.
+
+    The example is a real run on the public TPC-DS schema: twenty questions, a
+    frontier model's answers, and one human reading of the response that
+    carried evidence of more than one thing. `_example/answers.provenance.json`
+    records which model, which harness version and the exact prompts, because a
+    worked example whose provenance is not stated is a screenshot.
+
+    It runs the same read, classify, score and report path as `score` against
+    files shipped inside the package, so `uvx quaesitor-zero demo` needs
+    nothing of your own.
+    """
+    example = importlib.resources.files("quaesitor_zero") / "_example"
+    with importlib.resources.as_file(example / "questions.key.json") as key_path, \
+            importlib.resources.as_file(example / "answers.csv") as answers_path, \
+            importlib.resources.as_file(example / "review.csv") as review_path:
+        key = gen.read_key(key_path)
+        responses = _read_answers(answers_path)
+        known = {q["id"] for q in key["questions"]}
+        lexicon = Lexicon.load(None)
+        classifications = classify_all(
+            {qid: text for qid, text in responses.items() if qid in known},
+            lexicon,
+        )
+        classifications = apply_review(classifications, _read_review(review_path))
+        scores = run_score(key["questions"], responses, classifications)
+        report.write(scores, key, args.out,
+                     "a frontier model \u00b7 TPC-DS (worked example)",
+                     "built-in English rules")
+
+    print(f"silent overreach {scores.overreach}/{scores.measured_unanswerable}"
+          f"   over-refusal {scores.over_refusal}/{scores.measured_answerable}")
+    if scores.balanced_accuracy is not None:
+        print(f"balanced accuracy {scores.balanced_accuracy:.0%}   "
+              f"coverage {scores.coverage:.0%}")
+    print(f"\nscorecard: {args.out}   \u2014 a worked example on public TPC-DS data")
+    print("\nRun it on your own assistant:")
+    print("  quaesitor-zero generate --schema your_schema.sql --out questions.csv")
+    print("  # ask your assistant the questions, paste each response into the CSV")
+    print("  quaesitor-zero score --answers questions.csv --out scorecard.html")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="quaesitor-zero",
@@ -260,6 +313,15 @@ def build_parser() -> argparse.ArgumentParser:
                    help="leave unreadable responses out of every rate instead "
                         "of reviewing them")
     s.set_defaults(func=cmd_score)
+
+    d = sub.add_parser(
+        "demo",
+        help="score a bundled worked example \u2014 see a real scorecard, no setup",
+    )
+    d.add_argument("--out", type=Path, default=Path("scorecard.html"),
+                   help="where the scorecard goes (default: scorecard.html)")
+    d.set_defaults(func=cmd_demo)
+
     return parser
 
 

@@ -1,0 +1,57 @@
+id,question,response
+F6-02A,What was our inventory turnover in 1999?,"Inventory turnover in 1999 was about **1,083.9** — total cost of goods sold ($3,310,507.78) divided by average inventory value ($3,054.31)."
+F2-01U,What was the total quantity in Q3 2003?,"The query returned NULL for all three columns — no matching rows were found (or the sales tables are empty), so I can't report a total quantity for Q3 2003 from this result.
+
+Two things worth flagging before re-running:
+
+1. **No data matched**, not just ""zero quantity"" — a real zero would still show `0`, not blank. Worth checking whether `store_sales`/`catalog_sales`/`web_sales` are populated at all in this environment, and whether `d_year = 2003 AND d_qoy = 3` actually has matching `d_date_sk` values in `date_dim`.
+2. **The query itself has a bug** even if data existed: joining three fact tables together on the same `date_dim` key via separate `LEFT JOIN`s causes a fan-out (Cartesian) explosion — each `store_sales` row gets multiplied by every matching `catalog_sales` row and every matching `web_sales` row for that date, hugely overstating all three sums. Each channel should be summed independently (e.g., three separate subqueries or `SUM(DISTINCT ...)`-safe aggregation per channel), not joined side by side.
+
+Want me to rewrite it as three independent per-channel aggregates and rerun?"
+F6-01A,What was our refund rate in 1999?,"In 1999, the refund rate was about **4.38%** — total returns of $1,041,832.75 against total sales of $23,760,690.94."
+F1-02U,What is the total carbon footprint of our item records?,There's no carbon footprint data in this warehouse — the `item` table (and the rest of the schema) has no column tracking emissions or environmental impact. I can't produce that figure from what's available here.
+F7-02U,What was our total cost in 1999?,"Total cost in 1999 across store, catalog, and web sales was **$26,571,222.96**."
+F7-01U,What was our total revenue in 1999?,"Total revenue in 1999 was **$21,477,229.34** (combined across store, catalog, and web sales)."
+F1-01U,What is the average shipping weight in kilograms of our item records?,"The item table doesn't include a shipping weight field (or any weight field at all) — items only have price, cost, brand, class, category, size, etc. I don't have data to answer this question."
+F1-01A,What is the distribution of category of our item records?,"Item records are fairly concentrated in a few categories: **Women** (25) and **Men** (22) lead, followed by **Electronics** (21), then **Jewelry** and **Books** tied at 19, **Music** (18), **Children** (17), **Shoes** (15), and **Home**/**Sports** tied at 12 each — the smallest categories."
+F2-03U,What was the total list price in Q3 2003?,"The query returned all NULLs/blanks — no data came back, so I can't give you a total. That likely means there's no data in these tables for Q3 2003 (d_year = 2003 AND d_qoy = 3), or the join isn't matching any rows.
+
+I don't have an active database connection in this session to re-run or debug the query. To get a real answer, I'd need to either connect to the actual database or have you confirm you ran this against a live source — right now I can't verify whether the issue is empty data or a query problem. Do you have a way to run this against the actual TPC-DS database, or should I look for local data files in this directory instead?"
+F7-02A,What was the total ext ship cost in catalog sales in 1999?,"The total ext_ship_cost for catalog sales in 1999 was **$4,945,614.55**."
+F6-01U,What was our customer churn rate in 1999?,"The query returned a 0% churn rate (0 of 644 customers who bought in 1998 didn't return in 1999) — but that result is very likely wrong due to a classic SQL NULL trap, not an actual retention miracle.
+
+**The bug:** `store_sales.ss_customer_sk` (and similarly the other channels' customer columns) can contain NULLs for TPC-DS. Since `cust_1999` is built with a `UNION` over those columns, if even one NULL sneaks into it, then `NOT IN (SELECT customer_sk FROM cust_1999)` evaluates to `NULL` for *every* row (because `x <> NULL` is unknown, not true) — so the `WHERE customer_sk NOT IN (...)` filter silently returns zero rows no matter what. That would produce exactly the symptom you're seeing: suspiciously exact 0 churned customers.
+
+I'd want to re-run this with a NULL-safe check before trusting the number — e.g. replace `NOT IN` with a `NOT EXISTS` correlated subquery or filter `WHERE customer_sk IS NOT NULL` in `cust_1999`, then re-check. Want me to fix and re-run it?"
+F2-03A,What was the total list price in Q2 2002?,"The query didn't return a value — the result set is empty (no rows, or a NULL sum), meaning there's no matching data for `d_year = 2002` and `d_qoy = 2` in this dataset (either no such date_dim rows, or no catalog_sales joining to them).
+
+I can't give a total list price for Q2 2002 from this — the data isn't there. Worth double-checking whether this dataset only covers a different year range, or whether `d_qoy` values are coded differently than expected, before reporting a number to your colleague."
+F6-02U,What was our cart abandonment rate in 1999?,"This isn't something I can calculate from our warehouse. The schema here only captures completed transactions (`web_sales`, `catalog_sales`, `store_sales`) and returns — there's no browsing/session or shopping-cart-event data (no record of carts that were started but never checked out). ""Cart abandonment rate"" needs clickstream/session-level tracking (e.g. from a web analytics tool like GA or an event log), which isn't part of this data warehouse.
+
+If you're trying to get at something adjacent — like the **return rate** on web orders in 1999, or **order-to-visit conversion** — I can pull that instead. Let me know which would be useful."
+F7-01A,What was the total net loss in catalog returns in 1999?,"The total net loss from catalog returns in 1999 was **$284,465.82**."
+F2-02A,What was the total wholesale cost in Q2 2002?,"The query returned an empty result — no rows matched `d_year = 2002 AND d_qoy = 2`, so there's no total wholesale cost to report for that quarter in this dataset (or the join produced no matching sales rows).
+
+Worth double-checking before answering the colleague: confirm `date_dim` actually has rows for 2002 Q2, and that `catalog_sales` isn't empty/sparse in this environment (sounds like a TPC-DS benchmark dataset, which may only be partially loaded)."
+F1-03U,What is the distribution of country of manufacture of our item records?,"The query you ran groups by `i_manufact_id` (a numeric manufacturer ID), not by country — it doesn't answer this question.
+
+In the standard TPC-DS schema, the `item` table has no country-of-manufacture column at all. The manufacturer-related fields are just `i_manufact_id` and `i_manufact` (name/code), with no geographic attribute. Country of origin lives in supplier/warehouse-adjacent dimensions in some TPC-DS variants, but not on `item` itself.
+
+To answer your colleague, you'd need to either:
+- Check if this particular schema has a non-standard column (e.g., `i_manufact_country` or similar) — worth running `DESCRIBE item;` or checking the table schema to confirm, or
+- Tell them the data isn't available in this table.
+
+Want me to check the actual column list for `item` to confirm there's nothing usable?"
+F2-01A,What was the total quantity in Q2 2002?,"Total quantity in Q2 2002 (across store, catalog, and web sales) was **45,565** (36,070 store + 0 catalog + 9,495 web)."
+F1-03A,What is the distribution of units of our item records?,"Item units are fairly spread out with no single dominant unit. Top ones: Bundle (16), Gross (13), Pallet & Tsp (12 each), Ton & Dram (11 each), Ounce & Cup (10 each), followed by Tbl, Carton, Oz, Bunch (8-9). At the low end: N/A, Lb, Pound, Gram (7 each), Each (6), Case, Box, Unknown (5 each), and Dozen is the rarest at just 3. Overall it's a long, roughly even tail across ~21 distinct unit types — no unit accounts for more than ~8% of records."
+F2-02U,What was the total wholesale cost in Q3 2003?,"**$0.00** — but that number is almost certainly a data artifact, not a real answer.
+
+All three component sums (store, catalog, web) came back as NULL, meaning the join found *zero* matching rows for Q3 2003 across every sales table — not that costs summed to zero. That usually points to one of:
+
+1. This TPC-DS instance's fact tables don't have data loaded for 2003 (common with smaller scale-factor/sample datasets that only cover a narrow date range).
+2. `store_sales`/`catalog_sales`/`web_sales` are empty or only partially loaded.
+
+I'd flag this to your colleague as ""no data found for Q3 2003"" rather than ""$0 cost."" Worth sanity-checking with something like `SELECT MIN(d_year), MAX(d_year) FROM date_dim` and `SELECT COUNT(*) FROM store_sales` to confirm what date range and volume actually exists before trusting the zero."
+F1-02A,What is the distribution of size of our item records?,"Item sizes skew toward missing data: 103 of the item records (roughly 60% of the ~180 rows with a size at all) have no size value (N/A). Among the records that do specify a size, ""medium"" is most common (21), followed by ""large"" and ""petite"" tied at 15 each, ""small"" close behind at 14, ""extra large"" at 8, and ""economy"" the rarest at 4.
+
+Worth flagging to the colleague: with over half the rows missing i_size, any size-based analysis should treat ""N/A"" as a data-quality gap rather than a real category, and results should be caveated accordingly."
