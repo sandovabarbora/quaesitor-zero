@@ -153,3 +153,32 @@ def test_the_review_step_really_does_exit_3(tmp_path):
     assert code == 3, f"the how-to says status 3; the command returned {code}"
     assert not out.exists(), "it wrote a scorecard despite stopping for review"
     assert (tmp_path / "review.csv").exists(), "it did not write the review file"
+
+
+def test_every_local_link_in_the_readme_resolves():
+    """A README is the one file everybody reads and nobody builds.
+
+    Nothing compiles it, so a renamed asset or a moved document breaks silently
+    and stays broken until somebody scrolls past it on GitHub.
+    """
+    import re
+
+    root = Path(__file__).resolve().parent.parent
+    md = (root / "README.md").read_text(encoding="utf-8")
+    refs = (set(re.findall(r'(?:src|srcset)="([^"]+)"', md))
+            | set(re.findall(r"\]\(([^)]+)\)", md)))
+    broken = [r for r in refs
+              if not r.startswith(("http", "#", "mailto"))
+              and not (root / r).exists()]
+    assert not broken, f"the README points at files that are not there: {broken}"
+
+
+def test_the_recording_is_reproducible_from_a_checked_in_tape():
+    """The GIF is an artefact. The thing that makes it must be in the repo, or
+    the next person cannot regenerate it after the output changes."""
+    root = Path(__file__).resolve().parent.parent
+    tape = root / "docs" / "demo.tape"
+    assert tape.exists(), "docs/demo.gif exists with no tape to rebuild it from"
+    text = tape.read_text(encoding="utf-8")
+    assert "quaesitor-zero demo" in text
+    assert "Output docs/demo.gif" in text
