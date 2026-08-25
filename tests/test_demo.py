@@ -71,7 +71,12 @@ def test_the_readme_quotes_the_figures_this_command_produces(tmp_path, capsys):
     assert hit, "the demo no longer prints the headline pair"
     overreach, un_total, refusal, an_total = hit.groups()
 
-    readme = README.read_text(encoding="utf-8")
+    # Normalised before matching: the claim is about the words and the figures,
+    # not about where a line happens to wrap or whether a phrase is bold. The
+    # first version compared raw text and failed the moment the README was
+    # rewrapped, which is a test guarding its own formatting rather than the
+    # thing it was written to guard.
+    readme = re.sub(r"\s+", " ", README.read_text(encoding="utf-8").replace("**", ""))
     assert f"answered {overreach} of {un_total} questions that have no answer" in readme, (
         f"the README's overreach figure disagrees with the demo, which says "
         f"{overreach} of {un_total}")
@@ -188,6 +193,24 @@ def test_each_recording_is_reproducible_from_a_checked_in_tape(gif, tape, comman
     text = (docs / tape).read_text(encoding="utf-8")
     assert f"Output docs/{gif}" in text
     assert command in text, f"{tape} no longer records {command!r}"
+
+
+def test_the_hero_recording_has_its_build_script():
+    """docs/demo.gif is a composite: vhs records the terminal, ffmpeg holds the
+    scorecard after it. Neither half is reproducible from the tape alone."""
+    docs = Path(__file__).resolve().parent.parent / "docs"
+    build = docs / "build-demo.sh"
+    assert build.exists(), "demo.gif is a composite with no script that rebuilds it"
+    text = build.read_text(encoding="utf-8")
+    assert "vhs docs/demo.tape" in text
+    assert "scorecard.png" in text, "the build no longer holds the scorecard"
+
+
+def test_the_scorecard_image_is_kept_even_though_the_readme_dropped_it():
+    """The hero GIF is built from it. Deleting it as unused breaks the build."""
+    docs = Path(__file__).resolve().parent.parent / "docs"
+    assert (docs / "scorecard.png").exists(), (
+        "docs/build-demo.sh needs scorecard.png to hold at the end of the GIF")
 
 
 def test_the_review_recording_has_its_scenario_script():
