@@ -10,7 +10,10 @@ from this example, and a README that disagrees with the command it documents
 is the failure this whole project measures, printed on its own front page.
 """
 
+import os
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -333,3 +336,26 @@ def test_the_workflow_runs_the_whole_suite_on_the_declared_pythons():
     assert "pytest -q" in workflow, "the workflow does not run the suite"
     assert "quaesitor-zero demo" in workflow, (
         "the workflow does not exercise the installed entry point")
+
+
+def test_the_suite_collects_without_the_repo_root_on_sys_path(tmp_path):
+    """The suite must not depend on where it was launched from.
+
+    `python -m pytest` puts the working directory on sys.path; the bare
+    `pytest` console script, which is what CI runs, does not. A suite that
+    imports across itself passes under the first and fails collection under
+    the second, so a green local run says nothing about CI.
+    """
+    root = Path(__file__).resolve().parent.parent
+    environment = dict(os.environ)
+    environment.pop("PYTHONPATH", None)
+    collected = subprocess.run(
+        [sys.executable, "-m", "pytest", "--collect-only", "-q", str(root / "tests")],
+        cwd=tmp_path,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    assert collected.returncode == 0, (
+        "the suite only collects when it happens to be launched from the "
+        f"repository root:\n{collected.stdout[-2000:]}")
