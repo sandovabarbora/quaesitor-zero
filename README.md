@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <img alt="Running quaesitor-zero demo, and the scorecard it produces" src="docs/hero.gif" width="820">
+  <img alt="The whole loop: a schema goes in, questions come out, replies go back, a scorecard comes out" src="docs/hero.gif" width="820">
 </p>
 
 ```bash
@@ -63,13 +63,25 @@ its own boundary, which is the honest part:
 
 That second half is what a [Quaesitor audit](https://quaesitor.eu) measures.
 
-## How it decides
+## What it means by "cannot answer"
 
-Questions come from eight families, each decidable from the schema, or the
-schema plus a profile of the data. Nobody has to agree with us about what
-*revenue* means for a question to be unanswerable.
-**[FAMILIES.md](FAMILIES.md)** is the specification, including where each family
-can be wrong.
+Not an opinion, and not a model's. Every question carries a warrant: the
+specific fact about the schema that makes it unanswerable. Three from the
+shipped TPC-DS example:
+
+**out-of-range period** &nbsp;·&nbsp; *What was the total quantity in Q3 2003?*  
+No fact table reaches past 2003-05-02 through date_dim.d_date, so Q3 2003 is outside the data by one quarter for every table that could answer it.
+
+**absent attribute** &nbsp;·&nbsp; *What is the total carbon footprint of our item records?*  
+No table or column name matches any of carbon, co2, emission, emissions, footprint, so the attribute is not recorded.
+
+**ambiguous by construction** &nbsp;·&nbsp; *What was our total cost in 1999?*  
+13 columns could be meant (catalog_returns.cr_return_ship_cost, catalog_sales.cs_ext_ship_cost, catalog_sales.cs_ext_wholesale_cost, catalog_sales.cs_wholesale_cost, item.i_wholesale_cost, promotion.p_cost), and the question gives no way to choose. Asking which is correct; picking one silently is the failure.
+
+Eight families produce these, each decidable from the schema or from a profile
+of the data. Nobody has to agree with us about what *revenue* means for the
+question to have no answer. **[FAMILIES.md](FAMILIES.md)** is the
+specification, including where each family can be wrong.
 
 Replies are classified **mechanically, never by a model** — a tool arguing that
 confident output needs a signal cannot rest its own number on a model's

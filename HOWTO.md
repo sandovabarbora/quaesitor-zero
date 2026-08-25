@@ -43,6 +43,8 @@ Before running anything on your own data:
 uvx quaesitor-zero demo
 ```
 
+![Running quaesitor-zero demo](docs/demo.gif)
+
 That scores a worked example bundled in the package — a real run against the
 public TPC-DS schema — and writes `scorecard.html`. No setup, no files of your
 own. If the output is not something you would want, stop here and you have

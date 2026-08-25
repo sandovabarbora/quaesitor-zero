@@ -1,11 +1,12 @@
 #!/bin/sh
-# Build docs/hero.gif: the terminal recording, then the scorecard it produced.
+# Build docs/hero.gif: the whole loop, then the scorecard it produced.
 #
+#   python examples/tpcds/build.py     # once, makes the warehouse
 #   ./docs/build-demo.sh
 #
 # Three stages, because vhs records a terminal and the payoff is a document.
 #
-#   1. vhs runs `quaesitor-zero demo` and ends on `open scorecard.html`
+#   1. vhs runs the four steps and ends on `open scorecard.html`
 #   2. headless Chrome captures that scorecard full height, in one image
 #   3. ffmpeg holds six windows of it, then joins the two halves
 #
@@ -27,8 +28,8 @@ command -v quaesitor-zero >/dev/null || { echo "quaesitor-zero not on PATH" >&2;
 [ -x "$CHROME" ] || { echo "Chrome not at $CHROME; set CHROME=" >&2; exit 1; }
 
 echo "1/3 recording the terminal"
-mkdir -p "$work/run"
-DEMO_DIR="$work/run" vhs docs/demo.tape
+./docs/workflow-setup.sh "$work/run"
+DEMO_DIR="$work/run" vhs docs/workflow.tape
 
 echo "2/3 capturing the scorecard full height"
 quaesitor-zero demo --out "$work/run/scorecard.html" >/dev/null
@@ -39,22 +40,22 @@ sleep 1
   http://127.0.0.1:8779/scorecard.html 2>/dev/null
 
 echo "3/3 assembling"
-ffmpeg -v error -i docs/demo.gif \
-  -vf "fps=16,scale=1100:400,setsar=1,format=yuv420p" -y "$work/term.mp4"
+ffmpeg -v error -i docs/workflow.gif \
+  -vf "fps=16,scale=1100:560,setsar=1,format=yuv420p" -y "$work/term.mp4"
 python3 - "$work" <<'PY'
 import pathlib, subprocess, sys
 work = sys.argv[1]
-# Each window is [y, y+400]: header and headline numbers; the 2x2; the two
-# rates and the assumptions; the per-family table; the families that found
-# nothing; the per-question evidence.
-STOPS = [0, 700, 1050, 1440, 1740, 2080]
+# Each window is [y, y+560]: header and headline numbers; the 2x2 and the two
+# rates; the assumptions and the per-family table; the families that found
+# nothing and the start of the per-question evidence.
+STOPS = [0, 620, 1150, 1600, 2040]
 lines = []
 for i, y in enumerate(STOPS):
     out = f"{work}/{i:02d}.png"
     subprocess.run(["ffmpeg", "-v", "error", "-i", "docs/scorecard-full.png",
-                    "-vf", f"crop=1100:400:0:{y}", "-frames:v", "1",
+                    "-vf", f"crop=1100:560:0:{y}", "-frames:v", "1",
                     "-update", "1", "-y", out], check=True)
-    lines += [f"file '{out}'", "duration 1.15"]
+    lines += [f"file '{out}'", "duration 1.3"]
 lines.append(f"file '{work}/{len(STOPS) - 1:02d}.png'")
 pathlib.Path(f"{work}/stops.txt").write_text("\n".join(lines) + "\n")
 PY
@@ -63,10 +64,10 @@ ffmpeg -v error -f concat -safe 0 -i "$work/stops.txt" \
 printf "file '%s/term.mp4'\nfile '%s/steps.mp4'\n" "$work" "$work" > "$work/join.txt"
 ffmpeg -v error -f concat -safe 0 -i "$work/join.txt" -c copy -y "$work/joined.mp4"
 ffmpeg -v error -i "$work/joined.mp4" \
-  -vf "fps=16,scale=900:-1:flags=lanczos,palettegen=max_colors=64:stats_mode=diff" \
+  -vf "fps=14,scale=900:-1:flags=lanczos,palettegen=max_colors=64:stats_mode=diff" \
   -y "$work/palette.png"
 ffmpeg -v error -i "$work/joined.mp4" -i "$work/palette.png" \
-  -lavfi "fps=16,scale=900:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=none:diff_mode=rectangle" \
+  -lavfi "fps=14,scale=900:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=none:diff_mode=rectangle" \
   -y docs/hero.gif
 
 ls -lh docs/hero.gif

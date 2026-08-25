@@ -1,30 +1,31 @@
 #!/bin/sh
 # Prepare the scenario docs/workflow.tape records.
 #
-# The recording shows all three steps against the public TPC-DS warehouse. It
-# is real end to end, which is only possible because the current generator
-# reproduces the recorded example's question set exactly: same warehouse, same
-# flags, 20 of 20 ids. So the replies in examples/tpcds/answers.csv really are
-# answers to the questions the recording generates, from the frontier-model run
-# whose provenance is in answers.provenance.json.
+# The recording is real end to end. That works because `generate` against the
+# example's own warehouse reproduces the recorded question set exactly: same 20
+# ids, same 20 question texts. So the replies in examples/tpcds/answers.csv
+# really are answers to the questions the recording generates, from the
+# frontier-model run whose provenance is in answers.provenance.json.
 #
-# Nothing here is written to make the tool look good. The replies are what the
-# model said.
+# It has to be that warehouse. A TPC-DS database generated separately covers a
+# different date range, and the families that name a year then name a different
+# one, so the replies would be answers to slightly different questions.
+# examples/tpcds/build.py makes the right one; it is gitignored because DuckDB
+# writes it in seconds.
 set -eu
 here=$(cd "$(dirname "$0")/.." && pwd)
 work=${1:?usage: workflow-setup.sh <dir>}
-warehouse=${2:-}
-rm -rf "$work"; mkdir -p "$work"; cd "$work"
+warehouse="$here/examples/tpcds/tpcds.duckdb"
 
-if [ -n "$warehouse" ]; then
-  cp "$warehouse" tpcds.duckdb
-elif [ -f "$here/examples/tpcds/tpcds.duckdb" ]; then
-  cp "$here/examples/tpcds/tpcds.duckdb" tpcds.duckdb
-else
-  echo "need the TPC-DS warehouse: python examples/tpcds/build.py" >&2
+[ -f "$warehouse" ] || {
+  echo "no warehouse at $warehouse; build it with:" >&2
+  echo "  python examples/tpcds/build.py" >&2
   exit 1
-fi
+}
 
+rm -rf "$work"; mkdir -p "$work"; cd "$work"
+cp "$warehouse" tpcds.duckdb
+cp "$here/examples/tpcds/schema.sql" .
 # Staged where the recording expects them, so the "paste the replies" beat is a
 # copy of real answers rather than an invention.
 cp "$here/examples/tpcds/answers.csv" .replies.csv

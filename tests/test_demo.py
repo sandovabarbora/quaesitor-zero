@@ -203,7 +203,7 @@ def test_the_hero_recording_has_its_build_script():
     assert build.exists(), "hero.gif is a composite with no script that rebuilds it"
     assert (docs / "hero.gif").exists(), "the README's hero image is not present"
     text = build.read_text(encoding="utf-8")
-    assert "vhs docs/demo.tape" in text
+    assert "vhs docs/workflow.tape" in text
     assert "scorecard-full.png" in text, "the build no longer holds the scorecard"
     assert "-y docs/hero.gif" in text, "the build no longer writes hero.gif"
 
@@ -220,7 +220,7 @@ def test_the_hero_ends_on_the_document_not_on_a_filename():
     """The terminal says `scorecard: scorecard.html` and stops, which is a
     promise. The recording opens it and reads through it."""
     docs = Path(__file__).resolve().parent.parent / "docs"
-    tape = (docs / "demo.tape").read_text(encoding="utf-8")
+    tape = (docs / "workflow.tape").read_text(encoding="utf-8")
     assert "open scorecard.html" in tape, (
         "the recording no longer opens the scorecard before the cut")
     # Six held windows plus the terminal: comfortably longer than the terminal
@@ -262,3 +262,35 @@ def test_the_readme_shows_the_composite_not_the_terminal_alone():
     # And the composite really is the longer of the two.
     assert ((root / "docs" / "hero.gif").stat().st_size
             > (root / "docs" / "demo.gif").stat().st_size)
+
+
+def test_the_readme_quotes_warrants_verbatim_from_the_key():
+    """The worked examples in the README are the tool's own words.
+
+    quaesitor.eu used to carry this material and derived it from the shipped
+    example at build time. Moving it to the README moved it from computed to
+    typed, which is the drift this project spends its time finding. So it is
+    checked instead: for every question the README shows, the warrant beside it
+    must be that question's warrant, character for character.
+
+    Keyed from the question to the warrant and not the other way round. Several
+    questions share a warrant — the three out-of-range-period ones have the
+    same sentence — so a warrant does not identify a question, and the first
+    version of this test failed on exactly that.
+    """
+    import json
+
+    root = Path(__file__).resolve().parent.parent
+    key = json.loads((root / "examples" / "tpcds" / "questions.key.json")
+                     .read_text(encoding="utf-8"))
+    readme = re.sub(r"\s+", " ", (root / "README.md").read_text(encoding="utf-8"))
+
+    shown = [q for q in key["questions"]
+             if re.sub(r"\s+", " ", q["text"]) in readme]
+    assert len(shown) >= 3, (
+        f"the README shows {len(shown)} of the example's questions; it should "
+        "show the three worked ones")
+    for q in shown:
+        assert re.sub(r"\s+", " ", q["warrant"]) in readme, (
+            f"{q['id']} is quoted in the README without its warrant, or with "
+            "one that no longer matches the key")
