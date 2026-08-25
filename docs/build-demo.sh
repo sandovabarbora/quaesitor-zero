@@ -1,5 +1,11 @@
 #!/bin/sh
-# Build docs/demo.gif: the terminal recording, then the scorecard it produced.
+# Build docs/hero.gif: the terminal recording, then the scorecard it produced.
+#
+# docs/demo.tape writes docs/demo.gif, the terminal on its own. This composites
+# that with the scorecard and writes docs/hero.gif, which is what the README
+# shows. Two names because they are two artefacts, and because renaming the one
+# a README points at is the only reliable way to get GitHub to stop serving a
+# cached copy of the previous version.
 #
 #   ./docs/build-demo.sh
 #
@@ -35,6 +41,6 @@ ffmpeg -v error -i "$work/joined.mp4" \
   -y "$work/palette.png"
 ffmpeg -v error -i "$work/joined.mp4" -i "$work/palette.png" \
   -lavfi "fps=20,scale=1000:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=none" \
-  -y docs/demo.gif
+  -y docs/hero.gif
 
-ls -lh docs/demo.gif
+ls -lh docs/hero.gif

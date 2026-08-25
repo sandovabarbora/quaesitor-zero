@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <img alt="Running quaesitor-zero demo, and the scorecard it produces" src="docs/demo.gif" width="820">
+  <img alt="Running quaesitor-zero demo, and the scorecard it produces" src="docs/hero.gif" width="820">
 </p>
 
 ```bash

@@ -196,14 +196,16 @@ def test_each_recording_is_reproducible_from_a_checked_in_tape(gif, tape, comman
 
 
 def test_the_hero_recording_has_its_build_script():
-    """docs/demo.gif is a composite: vhs records the terminal, ffmpeg holds the
+    """docs/hero.gif is a composite: vhs records the terminal, ffmpeg holds the
     scorecard after it. Neither half is reproducible from the tape alone."""
     docs = Path(__file__).resolve().parent.parent / "docs"
     build = docs / "build-demo.sh"
-    assert build.exists(), "demo.gif is a composite with no script that rebuilds it"
+    assert build.exists(), "hero.gif is a composite with no script that rebuilds it"
+    assert (docs / "hero.gif").exists(), "the README's hero image is not present"
     text = build.read_text(encoding="utf-8")
     assert "vhs docs/demo.tape" in text
     assert "scorecard.png" in text, "the build no longer holds the scorecard"
+    assert "-y docs/hero.gif" in text, "the build no longer writes hero.gif"
 
 
 def test_the_scorecard_image_is_kept_even_though_the_readme_dropped_it():
@@ -230,3 +232,20 @@ def test_the_howto_warns_about_the_line_endings():
     """
     howto = Path(__file__).resolve().parent.parent / "HOWTO.md"
     assert "CRLF" in howto.read_text(encoding="utf-8")
+
+
+def test_the_readme_shows_the_composite_not_the_terminal_alone():
+    """The README's image has to be the one that ends on a scorecard.
+
+    They are different files on purpose: `demo.tape` writes the terminal
+    recording, and the build composites it with the scorecard under a second
+    name. Pointing the README back at the terminal-only one would quietly undo
+    the payoff.
+    """
+    root = Path(__file__).resolve().parent.parent
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    assert 'src="docs/hero.gif"' in readme
+    assert 'src="docs/demo.gif"' not in readme
+    # And the composite really is the longer of the two.
+    assert ((root / "docs" / "hero.gif").stat().st_size
+            > (root / "docs" / "demo.gif").stat().st_size)
