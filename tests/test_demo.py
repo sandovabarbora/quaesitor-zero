@@ -93,11 +93,15 @@ def test_the_two_places_the_version_is_written_agree():
     fingerprint could not have matched it to a release.
     """
     import re
-    import tomllib
 
+    # Read with a regex rather than tomllib: the package supports 3.10 and
+    # tomllib is stdlib only from 3.11, so the tomllib version of this test
+    # passed on my machine and failed on the floor of the declared range. CI
+    # caught it before the badge existed to go red.
     root = Path(__file__).resolve().parent.parent
-    with (root / "pyproject.toml").open("rb") as handle:
-        packaged = tomllib.load(handle)["project"]["version"]
+    packaged = re.search(r'^version = "([^"]+)"',
+                         (root / "pyproject.toml").read_text(encoding="utf-8"),
+                         re.M).group(1)
     source = re.search(r'__version__ = "([^"]+)"',
                        (root / "src" / "quaesitor_zero" / "__init__.py")
                        .read_text(encoding="utf-8")).group(1)
@@ -294,3 +298,38 @@ def test_the_readme_quotes_warrants_verbatim_from_the_key():
         assert re.sub(r"\s+", " ", q["warrant"]) in readme, (
             f"{q['id']} is quoted in the README without its warrant, or with "
             "one that no longer matches the key")
+
+
+def test_the_tests_badge_points_at_a_workflow_that_exists():
+    """A badge that cannot go red is decoration.
+
+    The README shows a build status. If the workflow it names is deleted or
+    renamed, the badge keeps rendering — GitHub serves a grey `no status`
+    image, which reads at a glance like a green one.
+    """
+    root = Path(__file__).resolve().parent.parent
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    named = re.findall(r"actions/workflows/([\w.-]+)/badge\.svg", readme)
+    assert named, "the README no longer shows a build status"
+    for workflow in named:
+        assert (root / ".github" / "workflows" / workflow).exists(), (
+            f"the badge points at .github/workflows/{workflow}, which is not "
+            "in the repository")
+
+
+def test_the_workflow_runs_the_whole_suite_on_the_declared_pythons():
+    """It has to run what the badge claims, on the versions the package claims.
+
+    `requires-python = ">=3.10"`, and a test of mine used tomllib, which is
+    stdlib only from 3.11. It passed here and failed on the floor of the
+    declared range. That is the class of thing this workflow exists to catch.
+    """
+    root = Path(__file__).resolve().parent.parent
+    workflow = (root / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
+    floor = re.search(r'requires-python = ">=(\d+\.\d+)"',
+                      (root / "pyproject.toml").read_text(encoding="utf-8")).group(1)
+    assert f'"{floor}"' in workflow, (
+        f"the package supports {floor} and the workflow does not test it")
+    assert "pytest -q" in workflow, "the workflow does not run the suite"
+    assert "quaesitor-zero demo" in workflow, (
+        "the workflow does not exercise the installed entry point")

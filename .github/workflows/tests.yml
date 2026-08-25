@@ -1,0 +1,54 @@
+name: tests
+
+# A badge that says "passing" has to be able to say "failing". This runs the
+# whole suite on every push and pull request, across the Pythons the package
+# claims to support, so the badge in the README is a measurement rather than a
+# decoration.
+#
+# The suite includes the checks that hold the documents to the code: that the
+# README quotes the figures `demo` prints, that its worked examples carry the
+# warrants from questions.key.json, and that every local link resolves.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The floor and the ceiling of `requires-python = ">=3.10"`. The ones
+        # in between share a code path with one of these; testing all five
+        # would quadruple the run to catch nothing this package can express.
+        python: ["3.10", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . pytest
+
+      - name: Run the suite
+        run: pytest -q
+
+      - name: Score the bundled example
+        # Not covered by the suite: this is the wheel's own entry point, run
+        # the way a reader runs it. `uvx quaesitor-zero demo` failing on a
+        # fresh machine is the first thing anybody would hit.
+        run: |
+          quaesitor-zero --version
+          quaesitor-zero demo --out /tmp/scorecard.html
+          test -s /tmp/scorecard.html

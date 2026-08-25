@@ -14,7 +14,9 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/sandovabarbora/quaesitor-zero/actions/workflows/tests.yml"><img alt="tests" src="https://github.com/sandovabarbora/quaesitor-zero/actions/workflows/tests.yml/badge.svg"></a>
   <a href="https://pypi.org/project/quaesitor-zero/"><img alt="PyPI" src="https://img.shields.io/pypi/v/quaesitor-zero.svg"></a>
+  <a href="https://pypi.org/project/quaesitor-zero/"><img alt="Python 3.10+" src="https://img.shields.io/pypi/pyversions/quaesitor-zero.svg"></a>
   <a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
 </p>
 
