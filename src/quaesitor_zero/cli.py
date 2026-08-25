@@ -213,11 +213,12 @@ def cmd_score(args: argparse.Namespace) -> int:
 def cmd_demo(args: argparse.Namespace) -> int:
     """Score a bundled worked example, so the scorecard can be seen with no setup.
 
-    The example is a real run on the public TPC-DS schema: twenty questions, a
-    frontier model's answers, and one human reading of the response that
-    carried evidence of more than one thing. `_example/answers.provenance.json`
-    records which model, which harness version and the exact prompts, because a
-    worked example whose provenance is not stated is a screenshot.
+    The example is a real run on the public TPC-DS schema: ten unanswerable
+    questions, ten matched controls, a frontier model's answers, and the human
+    reading of the responses that carried evidence of more than one thing.
+    `_example/answers.provenance.json` travels with it and records which model,
+    which harness version and the exact prompts, because a worked example whose
+    provenance is not stated is a screenshot.
 
     It runs the same read, classify, score and report path as `score` against
     files shipped inside the package, so `uvx quaesitor-zero demo` needs
