@@ -264,8 +264,10 @@ def test_the_readme_shows_the_composite_not_the_terminal_alone():
     """
     root = Path(__file__).resolve().parent.parent
     readme = (root / "README.md").read_text(encoding="utf-8")
-    assert 'src="docs/hero.gif"' in readme
-    assert 'src="docs/demo.gif"' not in readme
+    # The path is absolute so the image also renders on PyPI, which does not
+    # resolve relative links; the file it ends in is what matters here.
+    assert "docs/hero.gif" in readme
+    assert "docs/demo.gif" not in readme
     # And the composite really is the longer of the two.
     assert ((root / "docs" / "hero.gif").stat().st_size
             > (root / "docs" / "demo.gif").stat().st_size)
@@ -359,3 +361,20 @@ def test_the_suite_collects_without_the_repo_root_on_sys_path(tmp_path):
     assert collected.returncode == 0, (
         "the suite only collects when it happens to be launched from the "
         f"repository root:\n{collected.stdout[-2000:]}")
+
+
+def test_the_readme_images_are_absolute_so_pypi_can_render_them():
+    """PyPI does not resolve a relative link, and shows a broken image.
+
+    The project page for 0.1.4 carried `docs/quaesitor.png` and rendered
+    nothing where the wordmark and the recording should be. GitHub resolves
+    them, so the README looked right everywhere it was checked.
+    """
+    import re
+
+    readme = (Path(__file__).resolve().parent.parent / "README.md").read_text(
+        encoding="utf-8")
+    refs = re.findall(r'(?:src|srcset)="([^"]+)"', readme)
+    assert refs, "the README shows no images at all"
+    relative = [r for r in refs if not r.startswith(("http://", "https://"))]
+    assert not relative, f"PyPI will not render these: {relative}"

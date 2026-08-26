@@ -8,4 +8,4 @@ It never connects to a model. The core has no LLM dependency at all, because a
 tool asking to be trusted about model behaviour cannot itself be a model.
 """
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"

@@ -1,8 +1,8 @@
 <p align="center">
   <a href="https://quaesitor.eu">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/quaesitor-dark.png">
-      <img alt="Quaesitor" src="docs/quaesitor.png" width="280">
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sandovabarbora/quaesitor-zero/main/docs/quaesitor-dark.png">
+      <img alt="Quaesitor" src="https://raw.githubusercontent.com/sandovabarbora/quaesitor-zero/main/docs/quaesitor.png" width="280">
     </picture>
   </a>
 </p>
@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <img alt="The whole loop: a schema goes in, questions come out, replies go back, a scorecard comes out" src="docs/hero.gif" width="820">
+  <img alt="The whole loop: a schema goes in, questions come out, replies go back, a scorecard comes out" src="https://raw.githubusercontent.com/sandovabarbora/quaesitor-zero/main/docs/hero.gif" width="820">
 </p>
 
 ```bash
